@@ -11,13 +11,22 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    DateTime today = DateTime.now()
+        .subtract(const Duration(hours: 3))
+        .add(const Duration(days: 0));
+
     return MaterialApp(
       title: 'Checklife',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: const HomePage(),
+      home: HomePage(
+        // date: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
+        // date: DateTime.now().subtract(const Duration(hours: 3)),
+        // date: DateTime.now().subtract(const Duration(hours: 3)),
+        date: DateTime(today.year, today.month, today.day),
+      ),
     );
   }
 }
