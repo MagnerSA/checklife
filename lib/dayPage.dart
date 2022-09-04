@@ -42,7 +42,9 @@ class _DayPageState extends State<DayPage> {
               Container(
                 height: 35,
                 width: 350,
-                child: Center(child: Text(formatting.getWeekDay(widget.date))),
+                child: Center(
+                    child: Text(
+                        "${formatting.getWeekDay(widget.date)}, ${formatting.dayAndMonth(widget.date)}")),
               ),
               Container(
                 height: 35,

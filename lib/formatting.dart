@@ -3,6 +3,21 @@ import 'package:checklife/comparing.dart';
 class Formatting {
   Comparing compare = Comparing();
 
+  Map<int, String> months = {
+    1: "Jan",
+    2: "Feb",
+    3: "Mar",
+    4: "Apr",
+    5: "May",
+    6: "Jun",
+    7: "Jul",
+    8: "Aug",
+    9: "Sep",
+    10: "Oct",
+    11: "Nov",
+    12: "Dec",
+  };
+
   getWeekDay(DateTime date) {
     print(date.weekday);
 
@@ -72,5 +87,9 @@ class Formatting {
 
     int newDay = count == 0 ? 7 : count;
     return newDay;
+  }
+
+  dayAndMonth(DateTime date) {
+    return "${date.day} ${months[date.month]}";
   }
 }

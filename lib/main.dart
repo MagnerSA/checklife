@@ -22,12 +22,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: CalendarPage(
-          // date: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
-          // date: DateTime.now().subtract(const Duration(hours: 3)),
-          // date: DateTime.now().subtract(const Duration(hours: 3)),
-          // date: DateTime(today.year, today.month, today.day),
-          ),
+      home: DayPage(
+        // date: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
+        // date: DateTime.now().subtract(const Duration(hours: 3)),
+        // date: DateTime.now().subtract(const Duration(hours: 3)),
+        date: DateTime(today.year, today.month, today.day),
+      ),
     );
   }
 }
