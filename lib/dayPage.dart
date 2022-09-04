@@ -2,16 +2,16 @@ import 'package:checklife/formatting.dart';
 import 'package:checklife/task.model.dart';
 import 'package:flutter/material.dart';
 
-class HomePage extends StatefulWidget {
+class DayPage extends StatefulWidget {
   final DateTime date;
 
-  const HomePage({Key? key, required this.date}) : super(key: key);
+  const DayPage({Key? key, required this.date}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<DayPage> createState() => _DayPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _DayPageState extends State<DayPage> {
   Formatting formatting = Formatting();
 
   Map<String, Task> tasks = {
@@ -60,14 +60,14 @@ class _HomePageState extends State<HomePage> {
 
                     return Column(
                       children: [
-                        const SizedBox(
-                          height: 10,
-                        ),
                         Container(
                           color: Colors.red,
                           height: 35,
                           width: 350,
                           child: Center(child: Text(element.title)),
+                        ),
+                        const SizedBox(
+                          height: 10,
                         ),
                       ],
                     );

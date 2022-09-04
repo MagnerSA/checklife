@@ -1,4 +1,5 @@
-import 'package:checklife/homePage.dart';
+import 'package:checklife/calendarPage.dart';
+import 'package:checklife/dayPage.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -21,12 +22,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: HomePage(
-        // date: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
-        // date: DateTime.now().subtract(const Duration(hours: 3)),
-        // date: DateTime.now().subtract(const Duration(hours: 3)),
-        date: DateTime(today.year, today.month, today.day),
-      ),
+      home: CalendarPage(
+          // date: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
+          // date: DateTime.now().subtract(const Duration(hours: 3)),
+          // date: DateTime.now().subtract(const Duration(hours: 3)),
+          // date: DateTime(today.year, today.month, today.day),
+          ),
     );
   }
 }

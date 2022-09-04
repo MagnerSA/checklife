@@ -8,29 +8,26 @@ class Formatting {
 
     String weekDay = "";
 
-    switch ((date.weekday + 1)) {
+    switch ((date.weekday)) {
+      case 7:
+        weekDay = "Domingo";
+        break;
       case 1:
-        weekDay = "Domingo";
-        break;
-      case 8:
-        weekDay = "Domingo";
-        break;
-      case 2:
         weekDay = "Segunda";
         break;
-      case 3:
+      case 2:
         weekDay = "Terça";
         break;
-      case 4:
+      case 3:
         weekDay = "Quarta";
         break;
-      case 5:
+      case 4:
         weekDay = "Quinta";
         break;
-      case 6:
+      case 5:
         weekDay = "Sexta";
         break;
-      case 7:
+      case 6:
         weekDay = "Sábado";
         break;
     }
@@ -46,7 +43,8 @@ class Formatting {
     DateTime today = DateTime.now();
     int difference = date.difference(today).inDays;
 
-    if (compare.isSameDay(date, DateTime.now())) {
+    if (compare.isSameDay(
+        date, DateTime.now().subtract(const Duration(hours: 3)))) {
       relativeDayDescription = "Hoje";
     } else if (date.compareTo(today) > 0) {
       if (difference == 0) {
@@ -67,5 +65,12 @@ class Formatting {
     }
 
     return relativeDayDescription;
+  }
+
+  weekDay(DateTime date) {
+    int count = (date.weekday + 1) % 7;
+
+    int newDay = count == 0 ? 7 : count;
+    return newDay;
   }
 }
