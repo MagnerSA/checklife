@@ -1,8 +1,14 @@
-import 'package:checklife/calendarPage.dart';
-import 'package:checklife/dayPage.dart';
+import 'package:checklife/style/style.dart';
+import 'package:checklife/view/calendarPage.dart';
+import 'package:checklife/view/dayPage/dayPage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
@@ -12,22 +18,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    DateTime today = DateTime.now()
-        .subtract(const Duration(hours: 3))
-        .add(const Duration(days: 0));
-
     return MaterialApp(
       title: 'Checklife',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: primaryColor,
+          secondary: secondaryColor,
+          background: backgroundColor,
+        ),
       ),
       debugShowCheckedModeBanner: false,
-      home: DayPage(
-        // date: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
-        // date: DateTime.now().subtract(const Duration(hours: 3)),
-        // date: DateTime.now().subtract(const Duration(hours: 3)),
-        date: DateTime(today.year, today.month, today.day),
-      ),
+      home: const DayPage(),
     );
   }
 }

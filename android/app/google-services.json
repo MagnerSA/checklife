@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "494374208426",
+    "project_id": "checklife-f4815",
+    "storage_bucket": "checklife-f4815.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494374208426:android:12a3b0cf65f81dcad8e1d3",
+        "android_client_info": {
+          "package_name": "com.example.checklife"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "494374208426-noubja0e601cvtsnmqdkah3u1e83dnrk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcDh_eriumCs404TlMj-Wu-ELN2QrQZdg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "494374208426-noubja0e601cvtsnmqdkah3u1e83dnrk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

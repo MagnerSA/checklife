@@ -1,4 +1,4 @@
-import 'package:checklife/comparing.dart';
+import 'package:checklife/util/comparing.dart';
 
 class Formatting {
   Comparing compare = Comparing();
@@ -19,8 +19,6 @@ class Formatting {
   };
 
   getWeekDay(DateTime date) {
-    print(date.weekday);
-
     String weekDay = "";
 
     switch ((date.weekday)) {
@@ -91,5 +89,9 @@ class Formatting {
 
   dayAndMonth(DateTime date) {
     return "${date.day} ${months[date.month]}";
+  }
+
+  formatDate(DateTime date) {
+    return "${date.year.toString().padLeft(4, "0")}-${date.month.toString().padLeft(2, "0")}-${date.day.toString().padLeft(2, "0")}";
   }
 }

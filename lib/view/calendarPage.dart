@@ -1,6 +1,11 @@
-import 'package:checklife/comparing.dart';
-import 'package:checklife/formatting.dart';
+import 'package:checklife/util/comparing.dart';
+import 'package:checklife/util/formatting.dart';
+import 'package:checklife/style/style.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+import '../controllers/application.controller.dart';
+import 'dayPage/dayPage.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({Key? key}) : super(key: key);
@@ -12,6 +17,7 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   Formatting formatting = Formatting();
   Comparing compare = Comparing();
+  ApplicationController app = ApplicationController();
 
   List<List<DateTime>> dates = [];
   int head = 0;
@@ -26,13 +32,27 @@ class _CalendarPageState extends State<CalendarPage> {
 
   dayTile(DateTime day) {
     return Expanded(
-      child: Container(
-        color: compare.isSameDay(
-                DateTime.now().subtract(const Duration(hours: 3)), day)
-            ? Colors.red
-            : Colors.green,
-        child: Center(
-          child: Text(formatting.dayAndMonth(day)),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: () {
+            navigateToDayPage(day);
+          },
+          child: Ink(
+            decoration: BoxDecoration(
+                color: compare.isSameDay(
+                        DateTime.now().subtract(const Duration(hours: 3)), day)
+                    ? secondaryColor
+                    : primaryColor,
+                borderRadius: BorderRadius.circular(5)),
+            child: Center(
+              child: Text(formatting.dayAndMonth(day),
+                  style: const TextStyle(
+                    color: Colors.white,
+                  )),
+              // child: Text(day.toString()),
+            ),
+          ),
         ),
       ),
     );
@@ -78,7 +98,6 @@ class _CalendarPageState extends State<CalendarPage> {
 
   goUp() {
     if (head == 0) {
-      print("CRIOU NOVA UP");
       var lastWeekFirstDay = dates[0][0].subtract(const Duration(days: 7));
       var newWeek = createWeek(lastWeekFirstDay);
       setState(() {
@@ -94,7 +113,6 @@ class _CalendarPageState extends State<CalendarPage> {
 
   goDown() {
     if (head + 5 == lastIndex) {
-      print("CRIOU NOVA DOWN");
       var nextWeekFirstDay = dates[lastIndex][0].add(const Duration(days: 7));
       var newWeek = createWeek(nextWeekFirstDay);
       setState(() {
@@ -118,6 +136,16 @@ class _CalendarPageState extends State<CalendarPage> {
     return week;
   }
 
+  navigateToDayPage(DateTime newDate) {
+    app.setCurrentDate(newDate);
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const DayPage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -137,20 +165,23 @@ class _CalendarPageState extends State<CalendarPage> {
                 ),
               ),
               Expanded(
-                child: Column(
-                  children: [
-                    calendarLine(head),
-                    const SizedBox(height: 2),
-                    calendarLine(head + 1),
-                    const SizedBox(height: 2),
-                    calendarLine(head + 2),
-                    const SizedBox(height: 2),
-                    calendarLine(head + 3),
-                    const SizedBox(height: 2),
-                    calendarLine(head + 4),
-                    const SizedBox(height: 2),
-                    calendarLine(head + 5),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Column(
+                    children: [
+                      calendarLine(head),
+                      const SizedBox(height: 2),
+                      calendarLine(head + 1),
+                      const SizedBox(height: 2),
+                      calendarLine(head + 2),
+                      const SizedBox(height: 2),
+                      calendarLine(head + 3),
+                      // const SizedBox(height: 2),
+                      // calendarLine(head + 4),
+                      // const SizedBox(height: 2),
+                      // calendarLine(head + 5),
+                    ],
+                  ),
                 ),
               ),
               Container(
