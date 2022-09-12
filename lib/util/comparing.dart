@@ -12,4 +12,18 @@ class Comparing {
 
     return result;
   }
+
+  bool isBeforeToday(DateTime date) {
+    DateTime today = DateTime.now()
+        .subtract(const Duration(hours: 3))
+        .add(const Duration(days: 0));
+
+    today = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    );
+
+    return date.compareTo(today) < 0;
+  }
 }

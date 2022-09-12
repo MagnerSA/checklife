@@ -1,8 +1,9 @@
 class ApplicationController {
-  DateTime today = DateTime.now()
+  DateTime now = DateTime.now()
       .subtract(const Duration(hours: 3))
       .add(const Duration(days: 0));
-  late DateTime currentDate = DateTime(today.year, today.month, today.day);
+  late DateTime today = DateTime(now.year, now.month, now.day);
+  late DateTime currentDate = DateTime(now.year, now.month, now.day);
 
   static final ApplicationController _applicationController =
       ApplicationController._internal();

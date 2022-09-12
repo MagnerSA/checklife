@@ -1,8 +1,11 @@
 import 'package:checklife/controllers/application.controller.dart';
+import 'package:checklife/services/task.service.dart';
 import 'package:checklife/style/style.dart';
+import 'package:checklife/util/comparing.dart';
 import 'package:checklife/view/calendarPage.dart';
 import 'package:checklife/util/formatting.dart';
 import 'package:checklife/models/task.model.dart';
+import 'package:checklife/view/dayPage/widgets/taskCard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -17,38 +20,72 @@ class DayPage extends StatefulWidget {
 }
 
 class _DayPageState extends State<DayPage> {
+  TaskService service = TaskService();
+  Comparing compare = Comparing();
   Formatting formatting = Formatting();
   ApplicationController app = ApplicationController();
   FirebaseFirestore bd = FirebaseFirestore.instance;
   TextEditingController controller = TextEditingController();
+  FocusNode focusNode = FocusNode();
+
   bool isLoading = true;
+  bool filter = false;
 
   List<Task> tasks = [];
 
   @override
   initState() {
-    // updateTasks();
     loadTasks();
     super.initState();
   }
 
   loadTasks() async {
-    tasks.clear();
-
     isLoading = true;
 
-    var collection = await bd
-        .collection("tasks")
-        .where("date", isEqualTo: formatting.formatDate(app.currentDate))
-        .get();
+    tasks.clear();
 
-    setState(() {
-      for (var doc in collection.docs) {
-        Task task = Task.fromMap(doc.data());
-        tasks.add(task);
+    tasks = await service.getTasks(app.currentDate);
+
+    DateTime lastUpdate = await service.getLastUpdate();
+
+    if (lastUpdate.isBefore(app.currentDate) &&
+        compare.isSameDay(app.today, app.currentDate)) {
+      getOldTasks(lastUpdate);
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  getNextIndex() {
+    int nextIndex = 1;
+
+    if (tasks.isNotEmpty) {
+      nextIndex = formatting.getIndex(tasks[tasks.length - 1]) + 1;
+    }
+
+    return nextIndex;
+  }
+
+  getOldTasks(DateTime lastUpdate) async {
+    var nextIndex = getNextIndex();
+
+    var date = lastUpdate;
+
+    while (compare.isBeforeToday(date)) {
+      List<Task> list = await service.getPendentTasks(date);
+      for (var task in list) {
+        service.createTask(task, app.currentDate, nextIndex);
+        service.deleteTask(task.id);
+        nextIndex++;
       }
-      isLoading = false;
-    });
+      date = date.add(const Duration(days: 1));
+    }
+
+    await service.setLastUpdate(app.currentDate);
+
+    loadTasks();
   }
 
   navigateToCalendar() {
@@ -78,29 +115,31 @@ class _DayPageState extends State<DayPage> {
   }
 
   createTask() async {
-    String taskCode = (tasks.length + 1).toString().padLeft(5, '0');
-    String taskDate = formatting.formatDate(app.currentDate);
-
-    String id = "$taskDate $taskCode";
-
     Task newTask = Task(
-      date: taskDate,
+      date: "",
       title: controller.text,
-      id: id,
+      id: "",
       closed: false,
       description: "",
+      createdAt: formatting.formatDate(app.today),
     );
 
-    await bd
-        .collection("tasks")
-        .doc("$taskDate $taskCode")
-        .set(newTask.toMap());
+    newTask =
+        await service.createTask(newTask, app.currentDate, getNextIndex());
+    tasks.add(newTask);
 
     setState(() {
       controller.clear();
-      loadTasks();
     });
   }
+
+  setFilter() {
+    setState(() {
+      filter = !filter;
+    });
+  }
+
+  // focusNode.requestFocus();
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +157,16 @@ class _DayPageState extends State<DayPage> {
                   children: [
                     Expanded(
                       flex: 1,
-                      child: Container(),
+                      child: IconButton(
+                        onPressed: setFilter,
+                        icon: Icon(
+                          filter
+                              ? Icons.filter_alt_off_outlined
+                              : Icons.filter_alt_outlined,
+                          color: Colors.white,
+                          size: 25,
+                        ),
+                      ),
                     ),
                     Expanded(
                       flex: 3,
@@ -169,7 +217,7 @@ class _DayPageState extends State<DayPage> {
                     const SizedBox(height: 50),
                     const SizedBox(
                       height: 100,
-                      child: const SpinKitFoldingCube(
+                      child: const SpinKitDoubleBounce(
                         color: secondaryColor,
                         size: 50,
                       ),
@@ -194,55 +242,61 @@ class _DayPageState extends State<DayPage> {
                     Widget card;
 
                     if (i == tasks.length) {
-                      card = Column(
-                        children: [
-                          Container(
-                            color: Colors.white,
-                            height: 35,
-                            width: 350,
-                            child: Center(
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: controller,
-                                      decoration: const InputDecoration(
-                                        hintText: "Criar nova tarefa",
+                      card = Visibility(
+                        visible: !compare.isBeforeToday(app.currentDate) &&
+                            !isLoading,
+                        child: Column(
+                          children: [
+                            Container(
+                              color: Colors.white,
+                              height: 35,
+                              width: 350,
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextFormField(
+                                        focusNode: focusNode,
+                                        controller: controller,
+                                        decoration: const InputDecoration(
+                                          hintText: "Criar nova tarefa",
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  IconButton(
-                                    onPressed: createTask,
-                                    icon: const Icon(Icons.add),
-                                  ),
-                                ],
+                                    IconButton(
+                                      onPressed: createTask,
+                                      icon: const Icon(Icons.add),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                        ],
+                            const SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
                       );
                     } else {
                       Task element = tasks.elementAt(i);
-                      card = Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(
-                                color: Colors.grey.shade300,
-                              ),
+                      card = Visibility(
+                        visible: !filter || !element.closed,
+                        child: Column(
+                          children: [
+                            TaskCard(
+                              deleteTask: () async {
+                                await service.deleteTask(element.id);
+                                setState(() {
+                                  tasks.removeAt(i);
+                                });
+                              },
+                              task: element,
                             ),
-                            height: 35,
-                            width: 350,
-                            child: Center(child: Text(element.title)),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                        ],
+                            const SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
                       );
                     }
                     return card;

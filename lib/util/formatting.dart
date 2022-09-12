@@ -1,5 +1,7 @@
 import 'package:checklife/util/comparing.dart';
 
+import '../models/task.model.dart';
+
 class Formatting {
   Comparing compare = Comparing();
 
@@ -51,18 +53,16 @@ class Formatting {
   getRelativeDayDescription(DateTime date) {
     String relativeDayDescription = "";
 
-    ;
-
-    DateTime today = DateTime.now();
+    DateTime today = DateTime.parse(
+        formatDate(DateTime.now().subtract(const Duration(hours: 3))));
     int difference = date.difference(today).inDays;
 
-    if (compare.isSameDay(
-        date, DateTime.now().subtract(const Duration(hours: 3)))) {
+    if (compare.isSameDay(date, today)) {
       relativeDayDescription = "Hoje";
     } else if (date.compareTo(today) > 0) {
-      if (difference == 0) {
+      if (difference == 1) {
         relativeDayDescription = "Amanhã";
-      } else if (difference == 1) {
+      } else if (difference == 2) {
         relativeDayDescription = "Depois de amanhã";
       } else {
         relativeDayDescription = "Daqui a $difference dias";
@@ -93,5 +93,9 @@ class Formatting {
 
   formatDate(DateTime date) {
     return "${date.year.toString().padLeft(4, "0")}-${date.month.toString().padLeft(2, "0")}-${date.day.toString().padLeft(2, "0")}";
+  }
+
+  getIndex(Task task) {
+    return int.parse(task.id.split(" ")[1]);
   }
 }
