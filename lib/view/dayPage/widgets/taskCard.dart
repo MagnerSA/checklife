@@ -20,10 +20,22 @@ class TaskCard extends StatefulWidget {
 
 class _TaskCardState extends State<TaskCard> {
   ApplicationController app = ApplicationController();
-  bool isLoading = false;
   FirebaseFirestore bd = FirebaseFirestore.instance;
   TaskService service = TaskService();
+
+  TextEditingController textController = TextEditingController();
+
+  bool isLoading = false;
   bool isOpened = false;
+  bool isEditing = false;
+  bool isModified = false;
+
+  enableEdit() {
+    setState(() {
+      isEditing = true;
+      textController.text = widget.task.title;
+    });
+  }
 
   finishTask() async {
     setState(() {
@@ -49,6 +61,7 @@ class _TaskCardState extends State<TaskCard> {
     await widget.deleteTask();
 
     setState(() {
+      isOpened = false;
       isLoading = false;
     });
   }
@@ -56,6 +69,21 @@ class _TaskCardState extends State<TaskCard> {
   setIsOpened() {
     setState(() {
       isOpened = !isOpened;
+    });
+  }
+
+  saveChanges() async {
+    setState(() {
+      isEditing = false;
+      isModified = false;
+      isLoading = true;
+    });
+
+    widget.task.title = textController.text;
+    await bd.collection("tasks").doc(widget.task.id).set(widget.task.toMap());
+
+    setState(() {
+      isLoading = false;
     });
   }
 
@@ -91,8 +119,21 @@ class _TaskCardState extends State<TaskCard> {
           Expanded(
             flex: 5,
             child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Center(child: Text(widget.task.title)),
+              padding: EdgeInsets.all(10),
+              child: Center(
+                child: isEditing
+                    ? TextFormField(
+                        controller: textController,
+                        onChanged: (_) {
+                          if (!isModified) {
+                            setState(() {
+                              isModified = true;
+                            });
+                          }
+                        },
+                      )
+                    : Text(widget.task.title),
+              ),
             ),
           ),
           Expanded(
@@ -115,12 +156,10 @@ class _TaskCardState extends State<TaskCard> {
     int age = -1;
     if (widget.task.createdAt != "") {
       DateTime createdAt = DateTime.parse(widget.task.createdAt);
-      print("HOJE ${app.currentDate}");
-      print("DIA $createdAt");
+
       age = createdAt.compareTo(app.today) < 0
           ? app.currentDate.difference(createdAt).inDays
           : 0;
-      print("DIFERENÇA ${age}");
     }
 
     String text = age == -1 ? "Indisponível" : "Idade: $age dias";
@@ -128,6 +167,7 @@ class _TaskCardState extends State<TaskCard> {
     return !isOpened
         ? Container()
         : Container(
+            height: 50,
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border(
@@ -140,33 +180,111 @@ class _TaskCardState extends State<TaskCard> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  flex: 1,
-                  child: Container(),
-                ),
-                Expanded(
                   flex: 5,
-                  child: Center(child: Text(age == 0 ? "" : text)),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: isLoading
-                      ? const SpinKitRing(
-                          color: redColor,
-                          lineWidth: 2,
-                          size: 15,
-                        )
-                      : IconButton(
-                          onPressed: deleteTask,
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            size: 25,
-                            color: redColor,
-                          ),
-                        ),
+                  child: Center(child: Text(age == 0 ? "Criada hoje" : text)),
                 ),
               ],
             ),
           );
+  }
+
+  bottomOptions() {
+    return isOpened
+        ? Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(
+                  color: Colors.grey.shade300,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                isEditing && !isLoading
+                    ? Material(
+                        type: MaterialType.transparency,
+                        child: InkWell(
+                          onTap: deleteTask,
+                          child: Ink(
+                            width: 50,
+                            child: const Center(
+                              child: Icon(
+                                Icons.delete_outline,
+                                size: 20,
+                                color: redColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox(),
+                Expanded(
+                  child: Container(),
+                ),
+                isEditing && !isLoading
+                    ? Material(
+                        type: MaterialType.transparency,
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              isEditing = false;
+                            });
+                          },
+                          child: Ink(
+                              width: 50,
+                              child: const Center(
+                                child: Icon(
+                                  Icons.close,
+                                  size: 20,
+                                  color: redColor,
+                                ),
+                              )),
+                        ),
+                      )
+                    : const SizedBox(),
+                !isEditing
+                    ? Material(
+                        type: MaterialType.transparency,
+                        child: InkWell(
+                          onTap: enableEdit,
+                          child: Ink(
+                            width: 50,
+                            child: const Center(
+                              child: Icon(
+                                Icons.edit_outlined,
+                                size: 20,
+                                color: primaryColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox(),
+                isModified && isEditing
+                    ? Material(
+                        type: MaterialType.transparency,
+                        child: InkWell(
+                          onTap: saveChanges,
+                          child: Ink(
+                            width: 50,
+                            child: const Center(
+                              child: Icon(
+                                Icons.check,
+                                size: 20,
+                                color: greenColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox(),
+              ],
+            ),
+          )
+        : Container();
   }
 
   @override
@@ -183,6 +301,7 @@ class _TaskCardState extends State<TaskCard> {
             children: [
               topCard(),
               bottomCard(),
+              bottomOptions(),
             ],
           ),
         ),

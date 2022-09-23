@@ -40,15 +40,23 @@ class _CalendarPageState extends State<CalendarPage> {
           },
           child: Ink(
             decoration: BoxDecoration(
-                color: compare.isSameDay(
-                        DateTime.now().subtract(const Duration(hours: 3)), day)
+              // color: compare.isSameDay(
+              //         DateTime.now().subtract(const Duration(hours: 3)), day)
+              //     ? secondaryColor
+              //     : primaryColor,
+              borderRadius: BorderRadius.circular(5),
+              border: Border.all(
+                color: compare.isSameDay(app.today, day)
                     ? secondaryColor
-                    : primaryColor,
-                borderRadius: BorderRadius.circular(5)),
+                    : Colors.grey.shade300,
+              ),
+            ),
             child: Center(
               child: Text(formatting.dayAndMonth(day),
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: compare.isSameDay(app.today, day)
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade600,
                   )),
               // child: Text(day.toString()),
             ),

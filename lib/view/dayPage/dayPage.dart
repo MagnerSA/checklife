@@ -280,7 +280,8 @@ class _DayPageState extends State<DayPage> {
                     } else {
                       Task element = tasks.elementAt(i);
                       card = Visibility(
-                        visible: !filter || !element.closed,
+                        visible: (compare.isBeforeToday(app.currentDate)) ||
+                            (!filter || !element.closed),
                         child: Column(
                           children: [
                             TaskCard(
