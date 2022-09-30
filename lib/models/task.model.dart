@@ -3,8 +3,10 @@ class Task {
   late String title;
   late String? description;
   late bool closed = false;
+
   late String date;
   late String createdAt;
+  late String closedAt;
 
   Task({
     required this.id,
@@ -13,6 +15,7 @@ class Task {
     required this.closed,
     required this.date,
     required this.createdAt,
+    required this.closedAt,
   });
 
   Task.fromMap(Map<String, dynamic> map) {
@@ -22,6 +25,7 @@ class Task {
     closed = map["closed"] ?? false;
     description = map["description"] ?? "";
     createdAt = map["createdAt"] ?? "";
+    closedAt = map["closedAt"] ?? "";
   }
 
   toMap() {
@@ -32,7 +36,12 @@ class Task {
       "closed": closed,
       "date": date,
       "createdAt": createdAt,
+      "closedAt": createdAt,
     };
+  }
+
+  setClosedAt(String closedAt) {
+    this.closedAt = closedAt;
   }
 
   @override

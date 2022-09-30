@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:checklife/controllers/application.controller.dart';
 import 'package:checklife/services/task.service.dart';
 import 'package:checklife/style/style.dart';
@@ -5,12 +7,16 @@ import 'package:checklife/util/comparing.dart';
 import 'package:checklife/view/calendarPage.dart';
 import 'package:checklife/util/formatting.dart';
 import 'package:checklife/models/task.model.dart';
-import 'package:checklife/view/dayPage/widgets/taskCard.dart';
+import 'package:checklife/view/dayPage/widgets/optionsFooter.dart';
+import 'package:checklife/view/dayPage/widgets/realocatingTask.dart';
+import 'package:checklife/widgets/taskCard/main.dart';
+import 'package:checklife/widgets/taskCounter.dart';
+import 'package:checklife/widgets/taskCreationCard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-import '../../mock/tasks.dart';
+import '../login/login.dart';
 
 class DayPage extends StatefulWidget {
   const DayPage({Key? key}) : super(key: key);
@@ -20,18 +26,18 @@ class DayPage extends StatefulWidget {
 }
 
 class _DayPageState extends State<DayPage> {
-  TaskService service = TaskService();
-  Comparing compare = Comparing();
-  Formatting formatting = Formatting();
   ApplicationController app = ApplicationController();
-  FirebaseFirestore bd = FirebaseFirestore.instance;
-  TextEditingController controller = TextEditingController();
+  TaskService service = TaskService();
+
+  TextEditingController textController = TextEditingController();
+  ScrollController scrollController = ScrollController();
   FocusNode focusNode = FocusNode();
 
   bool isLoading = true;
   bool filter = false;
 
   List<Task> tasks = [];
+  List<int> tasksCounter = [0, 0];
 
   @override
   initState() {
@@ -41,7 +47,6 @@ class _DayPageState extends State<DayPage> {
 
   loadTasks() async {
     isLoading = true;
-
     tasks.clear();
 
     tasks = await service.getTasks(app.currentDate);
@@ -49,36 +54,49 @@ class _DayPageState extends State<DayPage> {
     DateTime lastUpdate = await service.getLastUpdate();
 
     if (lastUpdate.isBefore(app.currentDate) &&
-        compare.isSameDay(app.today, app.currentDate)) {
+        app.compare.isSameDay(app.today, app.currentDate)) {
       getOldTasks(lastUpdate);
     } else {
       setState(() {
+        countTasks();
         isLoading = false;
       });
     }
   }
 
-  getNextIndex() {
+  countTasks() {
+    tasksCounter[0] = 0;
+    tasksCounter[1] = 0;
+
+    for (var element in tasks) {
+      if (element.closed) {
+        tasksCounter[0]++;
+      } else {
+        tasksCounter[1]++;
+      }
+    }
+
+    setState(() {});
+  }
+
+  _getNextIndex() {
     int nextIndex = 1;
 
     if (tasks.isNotEmpty) {
-      nextIndex = formatting.getIndex(tasks[tasks.length - 1]) + 1;
+      nextIndex = app.formatting.getIndex(tasks[tasks.length - 1]) + 1;
     }
 
     return nextIndex;
   }
 
   getOldTasks(DateTime lastUpdate) async {
-    var nextIndex = getNextIndex();
-
     var date = lastUpdate;
 
-    while (compare.isBeforeToday(date)) {
+    while (app.compare.isBeforeToday(date)) {
       List<Task> list = await service.getPendentTasks(date);
       for (var task in list) {
-        service.createTask(task, app.currentDate, nextIndex);
-        service.deleteTask(task.id);
-        nextIndex++;
+        await service.createTask(task, app.currentDate);
+        await service.deleteTask(task.id);
       }
       date = date.add(const Duration(days: 1));
     }
@@ -92,6 +110,14 @@ class _DayPageState extends State<DayPage> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const CalendarPage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+  navigateToLogin() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => Login()),
       (Route<dynamic> route) => false,
     );
   }
@@ -114,32 +140,41 @@ class _DayPageState extends State<DayPage> {
     });
   }
 
-  createTask() async {
-    Task newTask = Task(
-      date: "",
-      title: controller.text,
-      id: "",
-      closed: false,
-      description: "",
-      createdAt: formatting.formatDate(app.today),
-    );
-
-    newTask =
-        await service.createTask(newTask, app.currentDate, getNextIndex());
-    tasks.add(newTask);
-
-    setState(() {
-      controller.clear();
-    });
-  }
-
   setFilter() {
     setState(() {
       filter = !filter;
     });
   }
 
-  // focusNode.requestFocus();
+  createTask() async {
+    Task newTask = Task(
+      date: "",
+      title: textController.text,
+      id: "",
+      closed: false,
+      description: "",
+      closedAt: "",
+      createdAt: app.formatting.formatDate(app.today),
+    );
+
+    newTask = await service.createTask(newTask, app.currentDate);
+    tasks.add(newTask);
+
+    setState(() {
+      countTasks();
+      textController.clear();
+    });
+  }
+
+  void addNewTask(Task newTask) {
+    tasks.add(newTask);
+  }
+
+  logout() {
+    app.userService.logout();
+
+    navigateToLogin();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,16 +193,15 @@ class _DayPageState extends State<DayPage> {
                     Expanded(
                       flex: 1,
                       child: IconButton(
-                        onPressed: setFilter,
-                        icon: Icon(
-                          filter
-                              ? Icons.filter_alt_off_outlined
-                              : Icons.filter_alt_outlined,
+                        onPressed: logout,
+                        icon: const Icon(
+                          Icons.logout,
                           color: Colors.white,
                           size: 25,
                         ),
                       ),
                     ),
+                    const SizedBox(width: 50),
                     Expanded(
                       flex: 3,
                       child: Column(
@@ -175,7 +209,7 @@ class _DayPageState extends State<DayPage> {
                         children: [
                           Center(
                             child: Text(
-                              "${formatting.getWeekDay(app.currentDate)}, ${formatting.dayAndMonth(app.currentDate)}",
+                              "${app.formatting.getWeekDay(app.currentDate)}, ${app.formatting.dayAndMonth(app.currentDate)}",
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -185,7 +219,7 @@ class _DayPageState extends State<DayPage> {
                           const SizedBox(height: 5),
                           Center(
                             child: Text(
-                              formatting
+                              app.formatting
                                   .getRelativeDayDescription(app.currentDate),
                               style: const TextStyle(
                                 color: Colors.white,
@@ -194,6 +228,19 @@ class _DayPageState extends State<DayPage> {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: IconButton(
+                        onPressed: setFilter,
+                        icon: Icon(
+                          filter
+                              ? Icons.filter_alt_off_outlined
+                              : Icons.filter_alt_outlined,
+                          color: Colors.white,
+                          size: 25,
+                        ),
                       ),
                     ),
                     Expanded(
@@ -210,22 +257,26 @@ class _DayPageState extends State<DayPage> {
                   ],
                 ),
               ),
+              TaskCounter(
+                closedTasksCount: tasksCounter[0],
+                regularTasksCount: tasksCounter[1],
+              ),
               Visibility(
                 visible: isLoading,
                 child: Column(
-                  children: [
-                    const SizedBox(height: 50),
-                    const SizedBox(
+                  children: const [
+                    SizedBox(height: 50),
+                    SizedBox(
                       height: 100,
-                      child: const SpinKitDoubleBounce(
+                      child: SpinKitDoubleBounce(
                         color: secondaryColor,
                         size: 50,
                       ),
                     ),
-                    const Center(
+                    Center(
                       child: Text(
                         "Carregando...",
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: primaryColor,
                           fontSize: 14,
                         ),
@@ -236,63 +287,42 @@ class _DayPageState extends State<DayPage> {
               ),
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(10),
+                  controller: scrollController,
+                  padding: const EdgeInsets.only(left: 10, right: 10),
                   itemCount: tasks.length + 1,
                   itemBuilder: (context, i) {
                     Widget card;
 
                     if (i == tasks.length) {
                       card = Visibility(
-                        visible: !compare.isBeforeToday(app.currentDate) &&
+                        visible: !app.compare.isBeforeToday(app.currentDate) &&
                             !isLoading,
-                        child: Column(
-                          children: [
-                            Container(
-                              color: Colors.white,
-                              height: 35,
-                              width: 350,
-                              child: Center(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextFormField(
-                                        focusNode: focusNode,
-                                        controller: controller,
-                                        decoration: const InputDecoration(
-                                          hintText: "Criar nova tarefa",
-                                        ),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: createTask,
-                                      icon: const Icon(Icons.add),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                          ],
+                        child: TaskCreationCard(
+                          focusNode: focusNode,
+                          createTask: createTask,
+                          textController: textController,
                         ),
                       );
                     } else {
                       Task element = tasks.elementAt(i);
                       card = Visibility(
-                        visible: (compare.isBeforeToday(app.currentDate)) ||
+                        visible: (app.compare.isBeforeToday(app.currentDate)) ||
                             (!filter || !element.closed),
                         child: Column(
                           children: [
                             TaskCard(
-                              deleteTask: () async {
-                                await service.deleteTask(element.id);
-                                setState(() {
-                                  tasks.removeAt(i);
-                                });
-                              },
-                              task: element,
-                            ),
+                                deleteTask: () async {
+                                  await service.deleteTask(element.id);
+                                  setState(() {
+                                    tasks.removeAt(i);
+                                    countTasks();
+                                  });
+                                },
+                                task: element,
+                                countTasks: countTasks,
+                                setPageState: () {
+                                  setState(() {});
+                                }),
                             const SizedBox(
                               height: 10,
                             ),
@@ -304,22 +334,20 @@ class _DayPageState extends State<DayPage> {
                   },
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(child: Container()),
-                  IconButton(
-                    onPressed: navigateToYesterday,
-                    icon: const Icon(Icons.keyboard_arrow_left),
-                  ),
-                  Expanded(child: Container()),
-                  IconButton(
-                    onPressed: navigateToTomorrow,
-                    icon: const Icon(Icons.keyboard_arrow_right),
-                  ),
-                  Expanded(child: Container()),
-                ],
-              ),
+              app.realocatedTask == null
+                  ? const SizedBox()
+                  : RealocatingTask(
+                      addNewTask: addNewTask,
+                      setPageState: () {
+                        setState(() {});
+                      },
+                    ),
+              OptionsFooter(
+                navigateToYesterday: navigateToYesterday,
+                navigateToTomorrow: navigateToTomorrow,
+                scrollController: scrollController,
+                focusNode: focusNode,
+              )
             ],
           ),
         ),

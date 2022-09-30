@@ -1,14 +1,19 @@
 import 'package:checklife/util/formatting.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/task.model.dart';
 
 class TaskService {
   FirebaseFirestore bd = FirebaseFirestore.instance;
+  FirebaseAuth auth = FirebaseAuth.instance;
+
   Formatting formatting = Formatting();
 
   getTasks(DateTime date) async {
     var collection = await bd
+        .collection("users")
+        .doc(auth.currentUser?.uid)
         .collection("tasks")
         .where("date", isEqualTo: formatting.formatDate(date))
         .get();
@@ -25,6 +30,8 @@ class TaskService {
 
   getPendentTasks(DateTime date) async {
     var collection = await bd
+        .collection("users")
+        .doc(auth.currentUser?.uid)
         .collection("tasks")
         .where("date", isEqualTo: formatting.formatDate(date))
         .where("closed", isEqualTo: false)
@@ -40,7 +47,9 @@ class TaskService {
     return tasks;
   }
 
-  createTask(Task task, DateTime date, int index) async {
+  createTask(Task task, DateTime date) async {
+    int index = await _getNextTaskIndex(date);
+
     String taskCode = (index).toString().padLeft(5, '0');
     String taskDate = formatting.formatDate(date);
 
@@ -52,10 +61,13 @@ class TaskService {
       id: id,
       closed: false,
       description: "",
+      closedAt: "",
       createdAt: task.createdAt,
     );
 
     await bd
+        .collection("users")
+        .doc(auth.currentUser?.uid)
         .collection("tasks")
         .doc("$taskDate $taskCode")
         .set(newTask.toMap());
@@ -64,19 +76,40 @@ class TaskService {
   }
 
   deleteTask(String id) async {
-    await bd.collection("tasks").doc(id).delete();
+    await bd
+        .collection("users")
+        .doc(auth.currentUser?.uid)
+        .collection("tasks")
+        .doc(id)
+        .delete();
   }
 
   getLastUpdate() async {
-    var doc = await bd.collection("config").doc("config").get();
+    var doc = await bd.collection("users").doc(auth.currentUser?.uid).get();
     var lastUpdate = doc.data()!["lastUpdate"];
     return DateTime.parse(lastUpdate);
   }
 
   setLastUpdate(DateTime date) async {
     await bd
-        .collection("config")
-        .doc("config")
+        .collection("users")
+        .doc(auth.currentUser?.uid)
         .update({"lastUpdate": formatting.formatDate(date)});
+  }
+
+  realocateTask(Task task, DateTime date) async {
+    print("Realocando task: ${task.title}");
+    print("Para o dia ${date.toString()}");
+
+    await deleteTask(task.id);
+    Task newTask = await createTask(task, date);
+
+    return newTask;
+  }
+
+  _getNextTaskIndex(DateTime date) async {
+    var tasks = await getTasks(date);
+
+    return tasks.length + 1;
   }
 }

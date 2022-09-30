@@ -1,18 +1,28 @@
 import 'package:checklife/services/task.service.dart';
 import 'package:checklife/style/style.dart';
+import 'package:checklife/widgets/taskCard/ageTab.dart';
+import 'package:checklife/widgets/taskCard/realocateTab.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-import '../../../controllers/application.controller.dart';
-import '../../../models/task.model.dart';
+import '../../../../controllers/application.controller.dart';
+import '../../../../models/task.model.dart';
+import '../../../../util/formatting.dart';
 
 class TaskCard extends StatefulWidget {
   final Task task;
   final Function deleteTask;
+  final Function countTasks;
+  final Function setPageState;
 
-  const TaskCard({Key? key, required this.task, required this.deleteTask})
-      : super(key: key);
+  const TaskCard({
+    Key? key,
+    required this.task,
+    required this.deleteTask,
+    required this.countTasks,
+    required this.setPageState,
+  }) : super(key: key);
 
   @override
   State<TaskCard> createState() => _TaskCardState();
@@ -22,6 +32,7 @@ class _TaskCardState extends State<TaskCard> {
   ApplicationController app = ApplicationController();
   FirebaseFirestore bd = FirebaseFirestore.instance;
   TaskService service = TaskService();
+  Formatting formatting = Formatting();
 
   TextEditingController textController = TextEditingController();
 
@@ -29,6 +40,7 @@ class _TaskCardState extends State<TaskCard> {
   bool isOpened = false;
   bool isEditing = false;
   bool isModified = false;
+  bool isRealocating = false;
 
   enableEdit() {
     setState(() {
@@ -42,13 +54,27 @@ class _TaskCardState extends State<TaskCard> {
       isLoading = true;
     });
 
-    print("ID aqui ${widget.task.id}");
-    print("TASK: ${widget.task.toString()}");
+    var newClosed = !widget.task.closed;
+    var newClosedAt = "";
 
-    widget.task.closed = !widget.task.closed;
-    await bd.collection("tasks").doc(widget.task.id).set(widget.task.toMap());
+    if (newClosed) {
+      newClosedAt = formatting.formatDate(app.today);
+    }
+
+    await bd
+        .collection("users")
+        .doc(app.userService.currentUserID())
+        .collection("tasks")
+        .doc(widget.task.id)
+        .update({
+      "closedAt": newClosedAt,
+      "closed": newClosed,
+    });
 
     setState(() {
+      widget.task.closed = newClosed;
+      widget.task.closedAt = newClosedAt;
+      widget.countTasks();
       isLoading = false;
     });
   }
@@ -61,6 +87,7 @@ class _TaskCardState extends State<TaskCard> {
     await widget.deleteTask();
 
     setState(() {
+      isEditing = false;
       isOpened = false;
       isLoading = false;
     });
@@ -80,7 +107,12 @@ class _TaskCardState extends State<TaskCard> {
     });
 
     widget.task.title = textController.text;
-    await bd.collection("tasks").doc(widget.task.id).set(widget.task.toMap());
+    await bd
+        .collection("users")
+        .doc(app.userService.currentUserID())
+        .collection("tasks")
+        .doc(widget.task.id)
+        .set(widget.task.toMap());
 
     setState(() {
       isLoading = false;
@@ -154,15 +186,29 @@ class _TaskCardState extends State<TaskCard> {
 
   bottomCard() {
     int age = -1;
-    if (widget.task.createdAt != "") {
+    if (widget.task.createdAt != "" &&
+        widget.task.closedAt != "" &&
+        widget.task.closed) {
       DateTime createdAt = DateTime.parse(widget.task.createdAt);
 
-      age = createdAt.compareTo(app.today) < 0
-          ? app.currentDate.difference(createdAt).inDays
+      DateTime closedAt = DateTime.parse(widget.task.closedAt);
+
+      age = createdAt.compareTo(closedAt) < 0
+          ? closedAt.difference(createdAt).inDays
+          : 0;
+    } else if (widget.task.createdAt != "" && !widget.task.closed) {
+      DateTime createdAt = DateTime.parse(widget.task.createdAt);
+
+      DateTime today = app.today;
+
+      age = createdAt.compareTo(today) < 0
+          ? today.difference(createdAt).inDays
           : 0;
     }
 
-    String text = age == -1 ? "Indisponível" : "Idade: $age dias";
+    String text = age == -1
+        ? "Indisponível"
+        : "${widget.task.closed ? "Durou" : "Idade"}: $age dia${age == 1 ? "" : "s"}";
 
     return !isOpened
         ? Container()
@@ -181,7 +227,12 @@ class _TaskCardState extends State<TaskCard> {
               children: [
                 Expanded(
                   flex: 5,
-                  child: Center(child: Text(age == 0 ? "Criada hoje" : text)),
+                  child: Center(
+                      child: Text(age == 0
+                          ? (widget.task.closed
+                              ? "Finalizada hoje"
+                              : "Criada hoje")
+                          : text)),
                 ),
               ],
             ),
@@ -287,6 +338,8 @@ class _TaskCardState extends State<TaskCard> {
         : Container();
   }
 
+  realocate() {}
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -300,7 +353,17 @@ class _TaskCardState extends State<TaskCard> {
           child: Column(
             children: [
               topCard(),
-              bottomCard(),
+              ...(isOpened
+                  ? [
+                      AgeTab(
+                        task: widget.task,
+                      ),
+                      RealocateTab(
+                        setStatePage: widget.setPageState,
+                        task: widget.task,
+                      )
+                    ]
+                  : []),
               bottomOptions(),
             ],
           ),
