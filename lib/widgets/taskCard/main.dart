@@ -1,6 +1,9 @@
 import 'package:checklife/services/task.service.dart';
 import 'package:checklife/style/style.dart';
+import 'package:checklife/widgets/squaredIconButton.dart';
+import 'package:checklife/widgets/squaredTextButton.dart';
 import 'package:checklife/widgets/taskCard/ageTab.dart';
+import 'package:checklife/widgets/taskCard/groupTab.dart';
 import 'package:checklife/widgets/taskCard/realocateTab.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -125,33 +128,45 @@ class _TaskCardState extends State<TaskCard> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            flex: 1,
-            child: isLoading
-                ? SpinKitRing(
-                    color: widget.task.closed
-                        ? secondaryColor
-                        : Colors.grey.shade400,
-                    lineWidth: 2,
-                    size: 15,
-                  )
-                : IconButton(
-                    onPressed: finishTask,
-                    icon: Icon(
-                      widget.task.closed
-                          ? Icons.check_box
-                          : Icons.check_box_outline_blank,
-                      size: 25,
-                      color: widget.task.closed
-                          ? secondaryColor
-                          : Colors.grey.shade400,
-                    ),
-                  ),
-          ),
+          isEditing
+              ? SquaredIconButton(
+                  iconData: Icons.close,
+                  width: 50,
+                  height: 50,
+                  onTap: () {
+                    setState(() {
+                      isEditing = false;
+                    });
+                  },
+                  iconColor: redColor,
+                )
+              : Expanded(
+                  flex: 1,
+                  child: isLoading
+                      ? SpinKitRing(
+                          color: widget.task.closed
+                              ? secondaryColor
+                              : Colors.grey.shade400,
+                          lineWidth: 2,
+                          size: 15,
+                        )
+                      : IconButton(
+                          onPressed: finishTask,
+                          icon: Icon(
+                            widget.task.closed
+                                ? Icons.check_box
+                                : Icons.check_box_outline_blank,
+                            size: 25,
+                            color: widget.task.closed
+                                ? secondaryColor
+                                : Colors.grey.shade400,
+                          ),
+                        ),
+                ),
           Expanded(
             flex: 5,
             child: Padding(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               child: Center(
                 child: isEditing
                     ? TextFormField(
@@ -164,21 +179,36 @@ class _TaskCardState extends State<TaskCard> {
                           }
                         },
                       )
-                    : Text(widget.task.title),
+                    // : Text(widget.task.title),
+                    : SquaredTextButton(
+                        text: widget.task.title,
+                        onTap: enableEdit,
+                      ),
               ),
             ),
           ),
-          Expanded(
-            flex: 1,
-            child: IconButton(
-              onPressed: setIsOpened,
-              icon: Icon(
-                isOpened ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                size: 25,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ),
+          isEditing
+              ? SquaredIconButton(
+                  iconData: Icons.check,
+                  iconSize: 25,
+                  width: 50,
+                  height: 50,
+                  onTap: isModified ? saveChanges : null,
+                  iconColor: isModified ? greenColor : Colors.grey[300],
+                )
+              : Expanded(
+                  flex: 1,
+                  child: IconButton(
+                    onPressed: setIsOpened,
+                    icon: Icon(
+                      isOpened
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      size: 25,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ),
         ],
       ),
     );
@@ -355,6 +385,9 @@ class _TaskCardState extends State<TaskCard> {
               topCard(),
               ...(isOpened
                   ? [
+                      GroupTab(
+                        task: widget.task,
+                      ),
                       AgeTab(
                         task: widget.task,
                       ),
@@ -364,7 +397,7 @@ class _TaskCardState extends State<TaskCard> {
                       )
                     ]
                   : []),
-              bottomOptions(),
+              // bottomOptions(),
             ],
           ),
         ),

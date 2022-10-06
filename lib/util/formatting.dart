@@ -19,6 +19,20 @@ class Formatting {
     11: "Nov",
     12: "Dec",
   };
+  Map<int, String> monthNames = {
+    1: "Janeiro",
+    2: "Fevereiro",
+    3: "Março",
+    4: "Abril",
+    5: "Maio",
+    6: "Junho",
+    7: "Julho",
+    8: "Agosto",
+    9: "Setembro",
+    10: "Outubro",
+    11: "Novembro",
+    12: "Dezembro",
+  };
 
   getWeekDay(DateTime date) {
     String weekDay = "";
@@ -89,6 +103,10 @@ class Formatting {
 
   dayAndMonth(DateTime date) {
     return "${date.day} ${months[date.month]}";
+  }
+
+  monthName(int month) {
+    return monthNames[month];
   }
 
   formatDate(DateTime date) {

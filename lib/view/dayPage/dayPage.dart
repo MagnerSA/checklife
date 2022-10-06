@@ -4,7 +4,7 @@ import 'package:checklife/controllers/application.controller.dart';
 import 'package:checklife/services/task.service.dart';
 import 'package:checklife/style/style.dart';
 import 'package:checklife/util/comparing.dart';
-import 'package:checklife/view/calendarPage.dart';
+import 'package:checklife/view/calendarPage/calendarPage.dart';
 import 'package:checklife/util/formatting.dart';
 import 'package:checklife/models/task.model.dart';
 import 'package:checklife/view/dayPage/widgets/optionsFooter.dart';

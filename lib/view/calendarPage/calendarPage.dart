@@ -1,11 +1,13 @@
+import 'package:checklife/controllers/application.controller.dart';
 import 'package:checklife/util/comparing.dart';
 import 'package:checklife/util/formatting.dart';
 import 'package:checklife/style/style.dart';
+import 'package:checklife/widgets/dayCard/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../controllers/application.controller.dart';
-import 'dayPage/dayPage.dart';
+import '../../controllers/application.controller.dart';
+import '../dayPage/dayPage.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({Key? key}) : super(key: key);
@@ -30,59 +32,23 @@ class _CalendarPageState extends State<CalendarPage> {
     super.initState();
   }
 
-  dayTile(DateTime day) {
-    return Expanded(
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: () {
-            navigateToDayPage(day);
-          },
-          child: Ink(
-            decoration: BoxDecoration(
-              // color: compare.isSameDay(
-              //         DateTime.now().subtract(const Duration(hours: 3)), day)
-              //     ? secondaryColor
-              //     : primaryColor,
-              borderRadius: BorderRadius.circular(5),
-              border: Border.all(
-                color: compare.isSameDay(app.today, day)
-                    ? secondaryColor
-                    : Colors.grey.shade300,
-              ),
-            ),
-            child: Center(
-              child: Text(formatting.dayAndMonth(day),
-                  style: TextStyle(
-                    color: compare.isSameDay(app.today, day)
-                        ? Colors.grey.shade600
-                        : Colors.grey.shade600,
-                  )),
-              // child: Text(day.toString()),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   calendarLine(int week) {
     return Expanded(
       child: Row(
         children: [
-          dayTile(dates[week][0]),
+          DayCard(date: dates[week][0]),
           const SizedBox(width: 2),
-          dayTile(dates[week][1]),
+          DayCard(date: dates[week][1]),
           const SizedBox(width: 2),
-          dayTile(dates[week][2]),
+          DayCard(date: dates[week][2]),
           const SizedBox(width: 2),
-          dayTile(dates[week][3]),
+          DayCard(date: dates[week][3]),
           const SizedBox(width: 2),
-          dayTile(dates[week][4]),
+          DayCard(date: dates[week][4]),
           const SizedBox(width: 2),
-          dayTile(dates[week][5]),
+          DayCard(date: dates[week][5]),
           const SizedBox(width: 2),
-          dayTile(dates[week][6]),
+          DayCard(date: dates[week][6]),
         ],
       ),
     );
@@ -142,16 +108,6 @@ class _CalendarPageState extends State<CalendarPage> {
     }
 
     return week;
-  }
-
-  navigateToDayPage(DateTime newDate) {
-    app.setCurrentDate(newDate);
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const DayPage()),
-      (Route<dynamic> route) => false,
-    );
   }
 
   @override
