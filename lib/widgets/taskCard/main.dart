@@ -2,7 +2,7 @@ import 'package:checklife/services/task.service.dart';
 import 'package:checklife/style/style.dart';
 import 'package:checklife/widgets/squaredIconButton.dart';
 import 'package:checklife/widgets/squaredTextButton.dart';
-import 'package:checklife/widgets/taskCard/ageTab.dart';
+import 'package:checklife/widgets/taskCard/descriptionTab.dart';
 import 'package:checklife/widgets/taskCard/groupTab.dart';
 import 'package:checklife/widgets/taskCard/realocateTab.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -385,10 +385,13 @@ class _TaskCardState extends State<TaskCard> {
               topCard(),
               ...(isOpened
                   ? [
-                      GroupTab(
+                      DescriptionTab(
                         task: widget.task,
+                        deleteTask: () {
+                          widget.deleteTask();
+                        },
                       ),
-                      AgeTab(
+                      GroupTab(
                         task: widget.task,
                       ),
                       RealocateTab(
