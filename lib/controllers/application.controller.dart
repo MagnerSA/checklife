@@ -1,3 +1,4 @@
+import 'package:checklife/controllers/navigation.controller.dart';
 import 'package:checklife/services/task.service.dart';
 import 'package:checklife/services/user.service.dart';
 import 'package:checklife/util/comparing.dart';
@@ -27,6 +28,7 @@ class ApplicationController {
   Formatting formatting = Formatting();
   TaskService taskService = TaskService();
   UserService userService = UserService();
+  NavigationController navigate = NavigationController();
 
   setCurrentDate(DateTime newDate) {
     currentDate = DateTime(newDate.year, newDate.month, newDate.day);

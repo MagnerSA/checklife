@@ -9,6 +9,8 @@ class SquaredIconButton extends StatefulWidget {
   final IconData? iconData;
   final double? iconSize;
   final Color? iconColor;
+  final Color? splashColor;
+  final Color? backgroundColor;
 
   const SquaredIconButton({
     Key? key,
@@ -18,6 +20,8 @@ class SquaredIconButton extends StatefulWidget {
     this.iconData,
     this.iconSize,
     this.iconColor,
+    this.splashColor,
+    this.backgroundColor,
   }) : super(key: key);
 
   @override
@@ -31,7 +35,10 @@ class _SquaredIconButtonState extends State<SquaredIconButton> {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: widget.onTap,
+        splashColor: widget.splashColor,
+        highlightColor: widget.splashColor,
         child: Ink(
+          color: widget.backgroundColor,
           width: widget.width,
           height: widget.height,
           child: Center(

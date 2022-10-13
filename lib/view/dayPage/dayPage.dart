@@ -9,6 +9,7 @@ import 'package:checklife/util/formatting.dart';
 import 'package:checklife/models/task.model.dart';
 import 'package:checklife/view/dayPage/widgets/optionsFooter.dart';
 import 'package:checklife/view/dayPage/widgets/realocatingTask.dart';
+import 'package:checklife/view/dayPage/widgets/topBar.dart';
 import 'package:checklife/widgets/taskCard/main.dart';
 import 'package:checklife/widgets/taskCounter.dart';
 import 'package:checklife/widgets/taskCreationCard.dart';
@@ -34,7 +35,7 @@ class _DayPageState extends State<DayPage> {
   FocusNode focusNode = FocusNode();
 
   bool isLoading = true;
-  bool filter = false;
+  bool isFiltering = false;
 
   List<Task> tasks = [];
   List<int> tasksCounter = [0, 0];
@@ -114,12 +115,11 @@ class _DayPageState extends State<DayPage> {
     );
   }
 
-  navigateToLogin() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => Login()),
-      (Route<dynamic> route) => false,
-    );
+  navigateToToday() {
+    setState(() {
+      app.setCurrentDate(app.today);
+      loadTasks();
+    });
   }
 
   navigateToTomorrow() {
@@ -137,12 +137,6 @@ class _DayPageState extends State<DayPage> {
     setState(() {
       app.setCurrentDate(yesterday);
       loadTasks();
-    });
-  }
-
-  setFilter() {
-    setState(() {
-      filter = !filter;
     });
   }
 
@@ -170,10 +164,10 @@ class _DayPageState extends State<DayPage> {
     tasks.add(newTask);
   }
 
-  logout() {
-    app.userService.logout();
-
-    navigateToLogin();
+  setFilter() {
+    setState(() {
+      isFiltering = !isFiltering;
+    });
   }
 
   @override
@@ -184,78 +178,13 @@ class _DayPageState extends State<DayPage> {
         body: Center(
           child: Column(
             children: [
-              Container(
-                color: primaryColor,
-                height: 75,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: IconButton(
-                        onPressed: logout,
-                        icon: const Icon(
-                          Icons.logout,
-                          color: Colors.white,
-                          size: 25,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 50),
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Center(
-                            child: Text(
-                              "${app.formatting.getWeekDay(app.currentDate)}, ${app.formatting.dayAndMonth(app.currentDate)}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Center(
-                            child: Text(
-                              app.formatting
-                                  .getRelativeDayDescription(app.currentDate),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: IconButton(
-                        onPressed: setFilter,
-                        icon: Icon(
-                          filter
-                              ? Icons.filter_alt_off_outlined
-                              : Icons.filter_alt_outlined,
-                          color: Colors.white,
-                          size: 25,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: IconButton(
-                        onPressed: navigateToCalendar,
-                        icon: const Icon(
-                          Icons.calendar_month,
-                          color: Colors.white,
-                          size: 25,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              TopBar(
+                isFiltering: isFiltering,
+                setPageState: () {
+                  setState(() {});
+                },
+                setFilter: setFilter,
+                navigateToToday: navigateToToday,
               ),
               TaskCounter(
                 closedTasksCount: tasksCounter[0],
@@ -307,7 +236,7 @@ class _DayPageState extends State<DayPage> {
                       Task element = tasks.elementAt(i);
                       card = Visibility(
                         visible: (app.compare.isBeforeToday(app.currentDate)) ||
-                            (!filter || !element.closed),
+                            (!isFiltering || !element.closed),
                         child: Column(
                           children: [
                             TaskCard(
