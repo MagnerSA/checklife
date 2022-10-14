@@ -3,6 +3,7 @@ import 'package:checklife/services/task.service.dart';
 import 'package:checklife/services/user.service.dart';
 import 'package:checklife/util/comparing.dart';
 import 'package:checklife/util/formatting.dart';
+import 'package:checklife/util/types.dart';
 
 import '../models/task.model.dart';
 
@@ -29,6 +30,7 @@ class ApplicationController {
   TaskService taskService = TaskService();
   UserService userService = UserService();
   NavigationController navigate = NavigationController();
+  Types types = Types();
 
   setCurrentDate(DateTime newDate) {
     currentDate = DateTime(newDate.year, newDate.month, newDate.day);

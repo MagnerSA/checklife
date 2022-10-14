@@ -149,6 +149,7 @@ class _DayPageState extends State<DayPage> {
       description: "",
       closedAt: "",
       createdAt: app.formatting.formatDate(app.today),
+      type: 0,
     );
 
     newTask = await service.createTask(newTask, app.currentDate);

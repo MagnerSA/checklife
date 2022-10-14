@@ -5,6 +5,7 @@ import 'package:checklife/widgets/squaredTextButton.dart';
 import 'package:checklife/widgets/taskCard/descriptionTab.dart';
 import 'package:checklife/widgets/taskCard/groupTab.dart';
 import 'package:checklife/widgets/taskCard/realocateTab.dart';
+import 'package:checklife/widgets/taskCard/typeTab.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -50,6 +51,10 @@ class _TaskCardState extends State<TaskCard> {
       isEditing = true;
       textController.text = widget.task.title;
     });
+  }
+
+  isFinishable() {
+    return !app.compare.isBeforeToday(app.currentDate);
   }
 
   finishTask() async {
@@ -122,9 +127,12 @@ class _TaskCardState extends State<TaskCard> {
     });
   }
 
+  getColor() {}
+
   topCard() {
     return Container(
       color: Colors.white,
+      height: 50,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -140,29 +148,38 @@ class _TaskCardState extends State<TaskCard> {
                   },
                   iconColor: redColor,
                 )
-              : Expanded(
-                  flex: 1,
-                  child: isLoading
-                      ? SpinKitRing(
-                          color: widget.task.closed
-                              ? secondaryColor
-                              : Colors.grey.shade400,
-                          lineWidth: 2,
-                          size: 15,
-                        )
-                      : IconButton(
-                          onPressed: finishTask,
-                          icon: Icon(
-                            widget.task.closed
-                                ? Icons.check_box
-                                : Icons.check_box_outline_blank,
-                            size: 25,
-                            color: widget.task.closed
-                                ? secondaryColor
-                                : Colors.grey.shade400,
-                          ),
-                        ),
-                ),
+              : isLoading
+                  ? SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: SpinKitRing(
+                        color: widget.task.closed
+                            ? secondaryColor
+                            : Colors.grey.shade400,
+                        lineWidth: 2,
+                        size: 20,
+                      ),
+                    )
+                  : SquaredIconButton(
+                      iconData: widget.task.closed
+                          ? (isFinishable() ? Icons.check_box : Icons.check)
+                          : Icons.check_box_outline_blank,
+                      iconColor: widget.task.closed
+                          ? Colors.white
+                          : app.types.getContrastColor(widget.task.type),
+                      backgroundColor: widget.task.closed
+                          ? greenColor
+                          : app.types.getBackgroundColor(widget.task.type),
+                      width: 50,
+                      height: 50,
+                      onTap: isFinishable() ? finishTask : null,
+                    ),
+          widget.task.closed
+              ? Container(
+                  color: app.types.getBackgroundColor(widget.task.type),
+                  width: 5,
+                )
+              : const SizedBox(),
           Expanded(
             flex: 5,
             child: Padding(
@@ -181,11 +198,15 @@ class _TaskCardState extends State<TaskCard> {
                       )
                     // : Text(widget.task.title),
                     : SquaredTextButton(
+                        height: 50,
                         text: widget.task.title,
                         onTap: enableEdit,
                       ),
               ),
             ),
+          ),
+          SizedBox(
+            width: widget.task.closed ? 5 : 0,
           ),
           isEditing
               ? SquaredIconButton(
@@ -196,18 +217,15 @@ class _TaskCardState extends State<TaskCard> {
                   onTap: isModified ? saveChanges : null,
                   iconColor: isModified ? greenColor : Colors.grey[300],
                 )
-              : Expanded(
-                  flex: 1,
-                  child: IconButton(
-                    onPressed: setIsOpened,
-                    icon: Icon(
-                      isOpened
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      size: 25,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
+              : SquaredIconButton(
+                  iconData: isOpened
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  iconSize: 25,
+                  width: 50,
+                  height: 50,
+                  onTap: setIsOpened,
+                  iconColor: Colors.grey.shade500,
                 ),
         ],
       ),
@@ -391,9 +409,13 @@ class _TaskCardState extends State<TaskCard> {
                           widget.deleteTask();
                         },
                       ),
-                      GroupTab(
+                      TypeTab(
+                        setStatePage: widget.setPageState,
                         task: widget.task,
                       ),
+                      // GroupTab(
+                      //   task: widget.task,
+                      // ),
                       RealocateTab(
                         setStatePage: widget.setPageState,
                         task: widget.task,

@@ -24,7 +24,13 @@ class _RealocatingTaskState extends State<RealocatingTask> {
   ApplicationController app = ApplicationController();
 
   Task fakeTask = Task(
-      closed: false, closedAt: '', createdAt: '', date: '', id: '', title: '');
+      closed: false,
+      closedAt: '',
+      createdAt: '',
+      date: '',
+      id: '',
+      title: '',
+      type: 0);
 
   getRealocationText() {
     String realocationText = "";
@@ -57,6 +63,7 @@ class _RealocatingTaskState extends State<RealocatingTask> {
 
   realocateTask() async {
     Task fakeTask = Task(
+        type: 0,
         closed: false,
         closedAt: '',
         createdAt: '',

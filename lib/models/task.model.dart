@@ -7,6 +7,7 @@ class Task {
   late String date;
   late String createdAt;
   late String closedAt;
+  late int type;
 
   Task({
     required this.id,
@@ -16,6 +17,7 @@ class Task {
     required this.date,
     required this.createdAt,
     required this.closedAt,
+    required this.type,
   });
 
   Task.fromMap(Map<String, dynamic> map) {
@@ -26,6 +28,7 @@ class Task {
     description = map["description"] ?? "";
     createdAt = map["createdAt"] ?? "";
     closedAt = map["closedAt"] ?? "";
+    type = map["type"] ?? 0;
   }
 
   toMap() {
@@ -37,6 +40,7 @@ class Task {
       "date": date,
       "createdAt": createdAt,
       "closedAt": createdAt,
+      "type": type,
     };
   }
 

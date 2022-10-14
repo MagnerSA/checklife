@@ -39,15 +39,21 @@ class _SquaredTextButtonState extends State<SquaredTextButton> {
           color: widget.color,
           width: widget.width,
           height: widget.height,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Center(
-              child: Text(
-                widget.text ?? "",
-                style: TextStyle(
-                  color: widget.textColor,
-                  fontSize: widget.textSize,
-                  fontWeight: widget.fontWeight,
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.fill,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 10,
+                  right: 10,
+                ),
+                child: Text(
+                  widget.text ?? "",
+                  style: TextStyle(
+                    color: widget.textColor,
+                    fontSize: 14,
+                    fontWeight: widget.fontWeight,
+                  ),
                 ),
               ),
             ),

@@ -56,6 +56,7 @@ class TaskService {
     String id = "$taskDate $taskCode";
 
     Task newTask = Task(
+      type: task.type,
       date: taskDate,
       title: task.title,
       id: id,
@@ -95,6 +96,15 @@ class TaskService {
         .collection("users")
         .doc(auth.currentUser?.uid)
         .update({"lastUpdate": formatting.formatDate(date)});
+  }
+
+  updateTask(Task task) async {
+    await bd
+        .collection("users")
+        .doc(auth.currentUser?.uid)
+        .collection("tasks")
+        .doc(task.id)
+        .set(task.toMap());
   }
 
   realocateTask(Task task, DateTime date) async {

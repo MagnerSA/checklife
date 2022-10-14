@@ -182,16 +182,16 @@ class _TopBarState extends State<TopBar> {
                       iconColor: Colors.white,
                       onTap: widget.navigateToToday,
                     ),
-                    SquaredIconButton(
-                      height: subBarHeight,
-                      width: subBarHeight + 25,
-                      iconData: Icons.calendar_view_week,
-                      iconSize: 20,
-                      iconColor: Colors.white,
-                      onTap: () {
-                        app.navigate.toWeek(context);
-                      },
-                    ),
+                    // SquaredIconButton(
+                    //   height: subBarHeight,
+                    //   width: subBarHeight + 25,
+                    //   iconData: Icons.calendar_view_week,
+                    //   iconSize: 20,
+                    //   iconColor: Colors.white,
+                    //   onTap: () {
+                    //     app.navigate.toWeek(context);
+                    //   },
+                    // ),
                     SquaredIconButton(
                       height: subBarHeight,
                       width: subBarHeight + 25,
