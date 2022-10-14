@@ -38,7 +38,7 @@ class _DayPageState extends State<DayPage> {
   bool isFiltering = false;
 
   List<Task> tasks = [];
-  List<int> tasksCounter = [0, 0];
+  List<int> tasksCounter = [0, 0, 0, 0, 0];
 
   @override
   initState() {
@@ -66,14 +66,30 @@ class _DayPageState extends State<DayPage> {
   }
 
   countTasks() {
-    tasksCounter[0] = 0;
-    tasksCounter[1] = 0;
+    tasksCounter = [0, 0, 0, 0, 0];
 
     for (var element in tasks) {
       if (element.closed) {
-        tasksCounter[0]++;
+        tasksCounter[4]++;
       } else {
-        tasksCounter[1]++;
+        switch (element.type) {
+          case 0:
+            tasksCounter[1]++;
+
+            break;
+          case 1:
+            tasksCounter[0]++;
+
+            break;
+          case 2:
+            tasksCounter[3]++;
+
+            break;
+          case 3:
+            tasksCounter[2]++;
+
+            break;
+        }
       }
     }
 
@@ -188,8 +204,11 @@ class _DayPageState extends State<DayPage> {
                 navigateToToday: navigateToToday,
               ),
               TaskCounter(
-                closedTasksCount: tasksCounter[0],
+                urgentTasksCount: tasksCounter[0],
                 regularTasksCount: tasksCounter[1],
+                reminderTasksCount: tasksCounter[2],
+                futileTasksCount: tasksCounter[3],
+                closedTasksCount: tasksCounter[4],
               ),
               Visibility(
                 visible: isLoading,

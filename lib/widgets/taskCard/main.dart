@@ -412,6 +412,7 @@ class _TaskCardState extends State<TaskCard> {
                       TypeTab(
                         setStatePage: widget.setPageState,
                         task: widget.task,
+                        countTasks: widget.countTasks,
                       ),
                       // GroupTab(
                       //   task: widget.task,

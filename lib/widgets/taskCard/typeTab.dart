@@ -8,11 +8,13 @@ import 'package:flutter/material.dart';
 class TypeTab extends StatefulWidget {
   final Function setStatePage;
   final Task task;
+  final Function countTasks;
 
   const TypeTab({
     Key? key,
     required this.setStatePage,
     required this.task,
+    required this.countTasks,
   }) : super(key: key);
 
   @override
@@ -37,6 +39,9 @@ class _TypeTabState extends State<TypeTab> {
     widget.task.type = type;
 
     app.taskService.updateTask(widget.task);
+
+    widget.countTasks();
+
     widget.setStatePage();
 
     setState(() {});

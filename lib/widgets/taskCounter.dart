@@ -5,13 +5,19 @@ import 'package:flutter/material.dart';
 import '../../../controllers/application.controller.dart';
 
 class TaskCounter extends StatefulWidget {
-  final int closedTasksCount;
+  final int urgentTasksCount;
   final int regularTasksCount;
+  final int reminderTasksCount;
+  final int futileTasksCount;
+  final int closedTasksCount;
 
   const TaskCounter({
     Key? key,
     required this.closedTasksCount,
     required this.regularTasksCount,
+    required this.urgentTasksCount,
+    required this.reminderTasksCount,
+    required this.futileTasksCount,
   }) : super(key: key);
 
   @override
@@ -59,17 +65,35 @@ class _TaskCounterState extends State<TaskCounter> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            widget.closedTasksCount == 0
+            widget.urgentTasksCount == 0
                 ? const SizedBox()
                 : counterIcon(
-                    count: widget.closedTasksCount,
-                    color: greenColor,
+                    count: widget.urgentTasksCount,
+                    color: app.types.getColor(1),
                   ),
             widget.regularTasksCount == 0
                 ? const SizedBox()
                 : counterIcon(
                     count: widget.regularTasksCount,
-                    color: Colors.grey[400],
+                    color: app.types.getColor(0),
+                  ),
+            widget.reminderTasksCount == 0
+                ? const SizedBox()
+                : counterIcon(
+                    count: widget.reminderTasksCount,
+                    color: app.types.getColor(3),
+                  ),
+            widget.futileTasksCount == 0
+                ? const SizedBox()
+                : counterIcon(
+                    count: widget.futileTasksCount,
+                    color: app.types.getColor(2),
+                  ),
+            widget.closedTasksCount == 0
+                ? const SizedBox()
+                : counterIcon(
+                    count: widget.closedTasksCount,
+                    color: greenColor,
                   ),
           ],
         ),
