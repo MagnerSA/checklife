@@ -122,4 +122,20 @@ class TaskService {
 
     return tasks.length + 1;
   }
+
+  getTasksCount(DateTime date) async {
+    var counters = [0, 0, 0, 0, 0];
+
+    List<Task> tasks = await getTasks(date);
+
+    for (var t in tasks) {
+      counters[t.type] += 1;
+
+      if (t.closed) {
+        counters[4] += 1;
+      }
+    }
+
+    return counters;
+  }
 }

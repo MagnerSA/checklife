@@ -174,6 +174,7 @@ class _TaskCardState extends State<TaskCard> {
                       height: 50,
                       onTap: isFinishable() ? finishTask : null,
                     ),
+          SizedBox(width: widget.task.closed ? 2.5 : 0),
           widget.task.closed
               ? Container(
                   color: app.types.getBackgroundColor(widget.task.type),
@@ -205,9 +206,7 @@ class _TaskCardState extends State<TaskCard> {
               ),
             ),
           ),
-          SizedBox(
-            width: widget.task.closed ? 5 : 0,
-          ),
+          SizedBox(width: widget.task.closed ? 7.5 : 0),
           isEditing
               ? SquaredIconButton(
                   iconData: Icons.check,
