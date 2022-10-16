@@ -131,7 +131,7 @@ class _TaskCardState extends State<TaskCard> {
 
   topCard() {
     return Container(
-      color: Colors.white,
+      color: widget.task.closed ? greenColor : Colors.white,
       height: 50,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -174,7 +174,6 @@ class _TaskCardState extends State<TaskCard> {
                       height: 50,
                       onTap: isFinishable() ? finishTask : null,
                     ),
-          SizedBox(width: widget.task.closed ? 2.5 : 0),
           widget.task.closed
               ? Container(
                   color: app.types.getBackgroundColor(widget.task.type),
@@ -201,12 +200,14 @@ class _TaskCardState extends State<TaskCard> {
                     : SquaredTextButton(
                         height: 50,
                         text: widget.task.title,
-                        onTap: enableEdit,
+                        onTap: widget.task.closed ? null : enableEdit,
+                        textColor:
+                            widget.task.closed ? Colors.white : Colors.black,
                       ),
               ),
             ),
           ),
-          SizedBox(width: widget.task.closed ? 7.5 : 0),
+          SizedBox(width: widget.task.closed ? 5 : 0),
           isEditing
               ? SquaredIconButton(
                   iconData: Icons.check,
@@ -224,7 +225,8 @@ class _TaskCardState extends State<TaskCard> {
                   width: 50,
                   height: 50,
                   onTap: setIsOpened,
-                  iconColor: Colors.grey.shade500,
+                  iconColor:
+                      widget.task.closed ? Colors.white : Colors.grey.shade500,
                 ),
         ],
       ),
