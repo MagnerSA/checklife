@@ -61,7 +61,7 @@ class TaskService {
       title: task.title,
       id: id,
       closed: false,
-      description: "",
+      description: task.description,
       closedAt: "",
       createdAt: task.createdAt,
     );

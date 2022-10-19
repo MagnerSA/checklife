@@ -129,9 +129,34 @@ class _TaskCardState extends State<TaskCard> {
 
   getColor() {}
 
+  Color getBackGroundcolor() {
+    Color backgroundColor = Colors.white;
+
+    if (widget.task.type == 1) backgroundColor = redColor;
+    if (widget.task.closed) backgroundColor = greenColor;
+
+    return backgroundColor;
+  }
+
+  getTextColor() {
+    Color textColor = Colors.black;
+
+    if (widget.task.closed || widget.task.type == 1) textColor = Colors.white;
+
+    return textColor;
+  }
+
+  getIconColor() {
+    Color iconColor = Colors.grey.shade500;
+
+    if (widget.task.closed || widget.task.type == 1) iconColor = Colors.white;
+
+    return iconColor;
+  }
+
   topCard() {
     return Container(
-      color: widget.task.closed ? greenColor : Colors.white,
+      color: getBackGroundcolor(),
       height: 50,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -201,8 +226,7 @@ class _TaskCardState extends State<TaskCard> {
                         height: 50,
                         text: widget.task.title,
                         onTap: widget.task.closed ? null : enableEdit,
-                        textColor:
-                            widget.task.closed ? Colors.white : Colors.black,
+                        textColor: getTextColor(),
                       ),
               ),
             ),
@@ -225,8 +249,7 @@ class _TaskCardState extends State<TaskCard> {
                   width: 50,
                   height: 50,
                   onTap: setIsOpened,
-                  iconColor:
-                      widget.task.closed ? Colors.white : Colors.grey.shade500,
+                  iconColor: getIconColor(),
                 ),
         ],
       ),
