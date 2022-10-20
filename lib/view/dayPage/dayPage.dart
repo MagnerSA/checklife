@@ -4,6 +4,7 @@ import 'package:checklife/controllers/application.controller.dart';
 import 'package:checklife/services/task.service.dart';
 import 'package:checklife/style/style.dart';
 import 'package:checklife/util/comparing.dart';
+import 'package:checklife/util/types.dart';
 import 'package:checklife/view/calendarPage/calendarPage.dart';
 import 'package:checklife/util/formatting.dart';
 import 'package:checklife/models/task.model.dart';
@@ -77,26 +78,9 @@ class _DayPageState extends State<DayPage> {
 
     for (var element in tasks) {
       if (element.closed) {
-        tasksCounter[4]++;
+        tasksCounter[Types.closed]++;
       } else {
-        switch (element.type) {
-          case 0:
-            tasksCounter[1]++;
-
-            break;
-          case 1:
-            tasksCounter[0]++;
-
-            break;
-          case 2:
-            tasksCounter[3]++;
-
-            break;
-          case 3:
-            tasksCounter[2]++;
-
-            break;
-        }
+        tasksCounter[element.type]++;
       }
     }
 
@@ -223,11 +207,11 @@ class _DayPageState extends State<DayPage> {
                 navigateToToday: _navigateToToday,
               ),
               TaskCounter(
-                urgentTasksCount: tasksCounter[0],
-                regularTasksCount: tasksCounter[1],
-                reminderTasksCount: tasksCounter[2],
-                futileTasksCount: tasksCounter[3],
-                closedTasksCount: tasksCounter[4],
+                urgentTasksCount: tasksCounter[Types.urgent],
+                regularTasksCount: tasksCounter[Types.simple],
+                reminderTasksCount: tasksCounter[Types.reminder],
+                futileTasksCount: tasksCounter[Types.futile],
+                closedTasksCount: tasksCounter[Types.closed],
               ),
               Visibility(
                 visible: isLoading,

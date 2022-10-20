@@ -1,5 +1,6 @@
 import 'package:checklife/services/task.service.dart';
 import 'package:checklife/style/style.dart';
+import 'package:checklife/util/types.dart';
 import 'package:checklife/widgets/squaredIconButton.dart';
 import 'package:checklife/widgets/squaredTextButton.dart';
 import 'package:checklife/widgets/taskCard/descriptionTab.dart';
@@ -99,11 +100,11 @@ class _TaskCardState extends State<TaskCard> {
     await widget.removeTask();
     await app.taskService.deleteTask(widget.task.id);
 
-    setState(() {
-      isEditing = false;
-      isOpened = false;
-      isLoading = false;
-    });
+    // setState(() {
+    //   isEditing = false;
+    //   isOpened = false;
+    //   isLoading = false;
+    // });
   }
 
   setIsOpened() {
@@ -137,7 +138,7 @@ class _TaskCardState extends State<TaskCard> {
   Color getBackGroundcolor() {
     Color backgroundColor = Colors.white;
 
-    if (widget.task.type == 1) backgroundColor = redColor;
+    if (widget.task.type == Types.urgent) backgroundColor = redColor;
     if (widget.task.closed) backgroundColor = greenColor;
 
     return backgroundColor;
@@ -146,7 +147,9 @@ class _TaskCardState extends State<TaskCard> {
   getTextColor() {
     Color textColor = Colors.black;
 
-    if (widget.task.closed || widget.task.type == 1) textColor = Colors.white;
+    if (widget.task.closed || widget.task.type == Types.urgent) {
+      textColor = Colors.white;
+    }
 
     return textColor;
   }
@@ -154,7 +157,9 @@ class _TaskCardState extends State<TaskCard> {
   getIconColor() {
     Color iconColor = Colors.grey.shade500;
 
-    if (widget.task.closed || widget.task.type == 1) iconColor = Colors.white;
+    if (widget.task.closed || widget.task.type == Types.urgent) {
+      iconColor = Colors.white;
+    }
 
     return iconColor;
   }

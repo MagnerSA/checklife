@@ -1,42 +1,35 @@
 import 'package:checklife/style/style.dart';
 import 'package:flutter/material.dart';
 
-class Types {
+class TypesController {
   final _colors = {
-    0: Colors.grey[400],
-    1: redColor,
-    2: primaryColor,
-    3: Colors.yellow,
-    4: greenColor,
+    Types.simple: Colors.grey[400],
+    Types.closed: greenColor,
+    Types.urgent: redColor,
+    Types.futile: blueColor,
+    Types.reminder: yellowColor,
   };
   final _backgroundColors = {
-    0: Colors.white,
-    1: redColor,
-    2: primaryColor,
-    3: Colors.yellow,
-    4: greenColor,
+    Types.simple: Colors.white,
+    Types.closed: greenColor,
+    Types.urgent: redColor,
+    Types.futile: blueColor,
+    Types.reminder: yellowColor,
   };
   final _constrastColors = {
-    0: Colors.grey[400],
-    1: Colors.white,
-    2: Colors.white,
-    3: Colors.white,
-    4: Colors.white,
+    Types.simple: greyColor,
+    Types.closed: Colors.white,
+    Types.urgent: Colors.white,
+    Types.futile: Colors.white,
+    Types.reminder: Colors.white,
   };
 
   final _titles = {
     0: "Tarefa simples",
-    1: "Tarefa urgente",
-    2: "Tarefa fútil",
-    3: "Lembrete",
-    4: "Finalizada"
-  };
-
-  final _positions = {
-    0: "Tarefa simples",
-    1: "Tarefa urgente",
-    2: "Tarefa fútil",
-    3: "Lembrete",
+    1: "Finalizada",
+    2: "Tarefa urgente",
+    3: "Tarefa fútil",
+    4: "Lembrete"
   };
 
   getColor(int type) {
@@ -54,4 +47,14 @@ class Types {
   getContrastColor(int type) {
     return _constrastColors[type];
   }
+}
+
+class Types {
+  Types._();
+
+  static const int simple = 0;
+  static const int closed = 1;
+  static const int urgent = 2;
+  static const int futile = 3;
+  static const int reminder = 4;
 }

@@ -132,7 +132,7 @@ class TaskService {
 
     for (var t in tasks) {
       if (t.closed) {
-        counters[4] += 1;
+        counters[1] += 1;
       } else {
         counters[t.type] += 1;
       }

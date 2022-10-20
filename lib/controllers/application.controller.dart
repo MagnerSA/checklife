@@ -30,7 +30,7 @@ class ApplicationController {
   TaskService taskService = TaskService();
   UserService userService = UserService();
   NavigationController navigate = NavigationController();
-  Types types = Types();
+  TypesController types = TypesController();
 
   setCurrentDate(DateTime newDate) {
     currentDate = DateTime(newDate.year, newDate.month, newDate.day);

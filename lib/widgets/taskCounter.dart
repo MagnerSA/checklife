@@ -1,4 +1,5 @@
 import 'package:checklife/style/style.dart';
+import 'package:checklife/util/types.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -69,25 +70,25 @@ class _TaskCounterState extends State<TaskCounter> {
                 ? const SizedBox()
                 : counterIcon(
                     count: widget.urgentTasksCount,
-                    color: app.types.getColor(1),
+                    color: app.types.getColor(Types.urgent),
                   ),
             widget.regularTasksCount == 0
                 ? const SizedBox()
                 : counterIcon(
                     count: widget.regularTasksCount,
-                    color: app.types.getColor(0),
+                    color: app.types.getColor(Types.simple),
                   ),
             widget.reminderTasksCount == 0
                 ? const SizedBox()
                 : counterIcon(
                     count: widget.reminderTasksCount,
-                    color: app.types.getColor(3),
+                    color: app.types.getColor(Types.reminder),
                   ),
             widget.futileTasksCount == 0
                 ? const SizedBox()
                 : counterIcon(
                     count: widget.futileTasksCount,
-                    color: app.types.getColor(2),
+                    color: app.types.getColor(Types.futile),
                   ),
             widget.closedTasksCount == 0
                 ? const SizedBox()

@@ -1,4 +1,5 @@
 import 'package:checklife/controllers/application.controller.dart';
+import 'package:checklife/util/types.dart';
 import 'package:checklife/view/dayPage/dayPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -115,28 +116,28 @@ class _DayCardState extends State<DayCard> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _widgetCounterRow(
-            count: counters[4],
+            count: counters[Types.closed],
             color: greenColor,
             numberColor: greenColor,
             isFinished: true,
           ),
           _widgetCounterRow(
-            count: counters[1],
+            count: counters[Types.urgent],
             numberColor: Colors.grey.shade500,
             color: redColor,
           ),
           _widgetCounterRow(
-            count: counters[0],
+            count: counters[Types.simple],
             numberColor: Colors.grey.shade500,
             color: Colors.grey.shade400,
           ),
           _widgetCounterRow(
-            count: counters[2],
+            count: counters[Types.futile],
             numberColor: Colors.grey.shade500,
             color: primaryColor,
           ),
           _widgetCounterRow(
-            count: counters[3],
+            count: counters[Types.reminder],
             numberColor: Colors.grey.shade500,
             color: Colors.yellow,
           ),

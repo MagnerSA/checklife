@@ -108,9 +108,9 @@ class _TypeTabState extends State<TypeTab> {
                 ...(isChoosingType
                     ? [
                         row(0, isFirst: true),
-                        row(1),
                         row(2),
                         row(3),
+                        row(4),
                       ]
                     : [
                         row(widget.task.type, isFirst: true),
