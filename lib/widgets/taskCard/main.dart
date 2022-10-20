@@ -16,14 +16,14 @@ import '../../../../util/formatting.dart';
 
 class TaskCard extends StatefulWidget {
   final Task task;
-  final Function deleteTask;
+  final Function removeTask;
   final Function countTasks;
   final Function setPageState;
 
   const TaskCard({
     Key? key,
     required this.task,
-    required this.deleteTask,
+    required this.removeTask,
     required this.countTasks,
     required this.setPageState,
   }) : super(key: key);
@@ -69,22 +69,26 @@ class _TaskCardState extends State<TaskCard> {
       newClosedAt = formatting.formatDate(app.today);
     }
 
-    await bd
-        .collection("users")
-        .doc(app.userService.currentUserID())
-        .collection("tasks")
-        .doc(widget.task.id)
-        .update({
-      "closedAt": newClosedAt,
-      "closed": newClosed,
-    });
+    if (app.compare.isToday(app.currentDate)) {
+      await app.taskService.finishTask(widget.task, newClosed, newClosedAt);
 
-    setState(() {
+      setState(() {
+        widget.task.closed = newClosed;
+        widget.task.closedAt = newClosedAt;
+        widget.countTasks();
+        isLoading = false;
+      });
+    } else {
       widget.task.closed = newClosed;
       widget.task.closedAt = newClosedAt;
-      widget.countTasks();
-      isLoading = false;
-    });
+      await app.taskService.realocateTask(widget.task, app.today);
+      // await app.taskService.finishTask(widget.task, newClosed, newClosedAt);
+      await widget.removeTask();
+      setState(() {
+        widget.countTasks();
+        isLoading = false;
+      });
+    }
   }
 
   deleteTask() async {
@@ -92,7 +96,8 @@ class _TaskCardState extends State<TaskCard> {
       isLoading = true;
     });
 
-    await widget.deleteTask();
+    await widget.removeTask();
+    await app.taskService.deleteTask(widget.task.id);
 
     setState(() {
       isEditing = false;
@@ -179,7 +184,7 @@ class _TaskCardState extends State<TaskCard> {
                       height: 50,
                       child: SpinKitRing(
                         color: widget.task.closed
-                            ? secondaryColor
+                            ? Colors.white
                             : Colors.grey.shade400,
                         lineWidth: 2,
                         size: 20,
@@ -223,6 +228,7 @@ class _TaskCardState extends State<TaskCard> {
                       )
                     // : Text(widget.task.title),
                     : SquaredTextButton(
+                        fitText: true,
                         height: 50,
                         text: widget.task.title,
                         onTap: widget.task.closed ? null : enableEdit,
@@ -311,105 +317,6 @@ class _TaskCardState extends State<TaskCard> {
           );
   }
 
-  bottomOptions() {
-    return isOpened
-        ? Container(
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                top: BorderSide(
-                  color: Colors.grey.shade300,
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                isEditing && !isLoading
-                    ? Material(
-                        type: MaterialType.transparency,
-                        child: InkWell(
-                          onTap: deleteTask,
-                          child: Ink(
-                            width: 50,
-                            child: const Center(
-                              child: Icon(
-                                Icons.delete_outline,
-                                size: 20,
-                                color: redColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    : const SizedBox(),
-                Expanded(
-                  child: Container(),
-                ),
-                isEditing && !isLoading
-                    ? Material(
-                        type: MaterialType.transparency,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              isEditing = false;
-                            });
-                          },
-                          child: Ink(
-                              width: 50,
-                              child: const Center(
-                                child: Icon(
-                                  Icons.close,
-                                  size: 20,
-                                  color: redColor,
-                                ),
-                              )),
-                        ),
-                      )
-                    : const SizedBox(),
-                !isEditing
-                    ? Material(
-                        type: MaterialType.transparency,
-                        child: InkWell(
-                          onTap: enableEdit,
-                          child: Ink(
-                            width: 50,
-                            child: const Center(
-                              child: Icon(
-                                Icons.edit_outlined,
-                                size: 20,
-                                color: primaryColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    : const SizedBox(),
-                isModified && isEditing
-                    ? Material(
-                        type: MaterialType.transparency,
-                        child: InkWell(
-                          onTap: saveChanges,
-                          child: Ink(
-                            width: 50,
-                            child: const Center(
-                              child: Icon(
-                                Icons.check,
-                                size: 20,
-                                color: greenColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    : const SizedBox(),
-              ],
-            ),
-          )
-        : Container();
-  }
-
   realocate() {}
 
   @override
@@ -430,7 +337,7 @@ class _TaskCardState extends State<TaskCard> {
                       DescriptionTab(
                         task: widget.task,
                         deleteTask: () {
-                          widget.deleteTask();
+                          deleteTask();
                         },
                       ),
                       TypeTab(

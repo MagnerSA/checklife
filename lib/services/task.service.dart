@@ -60,9 +60,9 @@ class TaskService {
       date: taskDate,
       title: task.title,
       id: id,
-      closed: false,
+      closed: task.closed,
       description: task.description,
-      closedAt: "",
+      closedAt: task.closedAt,
       createdAt: task.createdAt,
     );
 
@@ -85,10 +85,11 @@ class TaskService {
         .delete();
   }
 
-  getLastUpdate() async {
+  Future<String> getLastUpdate() async {
     var doc = await bd.collection("users").doc(auth.currentUser?.uid).get();
     var lastUpdate = doc.data()!["lastUpdate"];
-    return DateTime.parse(lastUpdate);
+
+    return lastUpdate ?? "";
   }
 
   setLastUpdate(DateTime date) async {
@@ -110,6 +111,7 @@ class TaskService {
   realocateTask(Task task, DateTime date) async {
     print("Realocando task: ${task.title}");
     print("Para o dia ${date.toString()}");
+    print("Task? $task");
 
     await deleteTask(task.id);
     Task newTask = await createTask(task, date);
@@ -129,13 +131,27 @@ class TaskService {
     List<Task> tasks = await getTasks(date);
 
     for (var t in tasks) {
-      counters[t.type] += 1;
-
       if (t.closed) {
         counters[4] += 1;
+      } else {
+        counters[t.type] += 1;
       }
     }
 
     return counters;
+  }
+
+  Future<bool> finishTask(Task task, bool newClosed, String newClosedAt) async {
+    await bd
+        .collection("users")
+        .doc(auth.currentUser?.uid)
+        .collection("tasks")
+        .doc(task.id)
+        .update({
+      "closedAt": newClosedAt,
+      "closed": newClosed,
+    });
+
+    return true;
   }
 }

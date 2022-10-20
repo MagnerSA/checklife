@@ -44,8 +44,6 @@ class _DayCardState extends State<DayCard> {
         _loadCounters();
       }
     }
-
-    // _loadCounters();
   }
 
   _loadCounters() async {
@@ -88,45 +86,99 @@ class _DayCardState extends State<DayCard> {
   }
 
   _getContent() {
-    return app.compare.isBeforeToday(widget.date)
-        ? _widgetFinished()
-        : Center();
+    bool isBeforeToday = app.compare.isBeforeToday(widget.date);
+
+    return isLoading
+        ? SpinKitDoubleBounce(
+            color: isBeforeToday ? Colors.white : primaryColor,
+            size: 20,
+          )
+        : isBeforeToday
+            ? _widgetFinished()
+            : _widgetContent();
   }
 
   _widgetFinished() {
-    bool isEmpty = counters[4] == 0;
-
     return Center(
-      child: isLoading
-          ? const SpinKitDoubleBounce(
-              color: Colors.white,
-              size: 20,
-            )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: Icon(
-                    Icons.check_circle,
-                    color: isEmpty ? Colors.transparent : Colors.white,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(
-                  width: 2.5,
-                ),
-                Center(
-                  child: Text(
-                    counters[4].toString(),
-                    style: TextStyle(
-                      color: isEmpty ? Colors.transparent : Colors.white,
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+      child: _widgetCounterRow(
+        color: Colors.white,
+        numberColor: Colors.white,
+        count: counters[4],
+        isFinished: true,
+      ),
     );
+  }
+
+  _widgetContent() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _widgetCounterRow(
+            count: counters[4],
+            color: greenColor,
+            numberColor: greenColor,
+            isFinished: true,
+          ),
+          _widgetCounterRow(
+            count: counters[1],
+            numberColor: Colors.grey.shade500,
+            color: redColor,
+          ),
+          _widgetCounterRow(
+            count: counters[0],
+            numberColor: Colors.grey.shade500,
+            color: Colors.grey.shade400,
+          ),
+          _widgetCounterRow(
+            count: counters[2],
+            numberColor: Colors.grey.shade500,
+            color: primaryColor,
+          ),
+          _widgetCounterRow(
+            count: counters[3],
+            numberColor: Colors.grey.shade500,
+            color: Colors.yellow,
+          ),
+        ],
+      ),
+    );
+  }
+
+  _widgetCounterRow({
+    required int count,
+    required Color color,
+    required Color numberColor,
+    bool? isFinished,
+  }) {
+    bool isEmpty = count == 0;
+
+    return isEmpty
+        ? const SizedBox()
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                child: Icon(
+                  isFinished ?? false ? Icons.check_circle : Icons.circle,
+                  color: color,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(
+                width: 2.5,
+              ),
+              Center(
+                child: Text(
+                  count.toString(),
+                  style: TextStyle(
+                    color: numberColor,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            ],
+          );
   }
 
   @override

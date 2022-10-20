@@ -52,7 +52,14 @@ class _DayPageState extends State<DayPage> {
 
     tasks = await service.getTasks(app.currentDate);
 
-    DateTime lastUpdate = await service.getLastUpdate();
+    String lastUpdateString = await service.getLastUpdate();
+    if (lastUpdateString == "") {
+      await service.setLastUpdate(app.currentDate);
+
+      lastUpdateString = app.formatting.formatDate(app.today);
+    }
+
+    DateTime lastUpdate = DateTime.parse(lastUpdateString);
 
     if (lastUpdate.isBefore(app.currentDate) &&
         app.compare.isSameDay(app.today, app.currentDate)) {
@@ -123,7 +130,7 @@ class _DayPageState extends State<DayPage> {
     loadTasks();
   }
 
-  navigateToCalendar() {
+  _navigateToCalendar() {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const CalendarPage()),
@@ -131,7 +138,7 @@ class _DayPageState extends State<DayPage> {
     );
   }
 
-  navigateToToday() {
+  _navigateToToday() {
     setState(() {
       app.setCurrentDate(app.today);
       loadTasks();
@@ -187,6 +194,18 @@ class _DayPageState extends State<DayPage> {
     });
   }
 
+  _removeTask(int i) {
+    setState(() {
+      tasks.removeAt(i);
+      countTasks();
+    });
+  }
+
+  _deleteTask(Task element, int i) async {
+    await service.deleteTask(element.id);
+    _removeTask(i);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -201,7 +220,7 @@ class _DayPageState extends State<DayPage> {
                   setState(() {});
                 },
                 setFilter: setFilter,
-                navigateToToday: navigateToToday,
+                navigateToToday: _navigateToToday,
               ),
               TaskCounter(
                 urgentTasksCount: tasksCounter[0],
@@ -260,12 +279,8 @@ class _DayPageState extends State<DayPage> {
                         child: Column(
                           children: [
                             TaskCard(
-                                deleteTask: () async {
-                                  await service.deleteTask(element.id);
-                                  setState(() {
-                                    tasks.removeAt(i);
-                                    countTasks();
-                                  });
+                                removeTask: () {
+                                  _removeTask(i);
                                 },
                                 task: element,
                                 countTasks: countTasks,
