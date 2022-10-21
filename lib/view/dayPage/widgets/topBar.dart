@@ -153,16 +153,16 @@ class _TopBarState extends State<TopBar> {
                       iconColor: Colors.white,
                       onTap: logout,
                     ),
-                    SquaredIconButton(
-                      height: subBarHeight,
-                      width: subBarHeight + 25,
-                      iconData: widget.isFiltering
-                          ? Icons.filter_alt_off_outlined
-                          : Icons.filter_alt_outlined,
-                      iconSize: 20,
-                      iconColor: Colors.white,
-                      onTap: widget.setFilter,
-                    ),
+                    // SquaredIconButton(
+                    //   height: subBarHeight,
+                    //   width: subBarHeight + 25,
+                    //   iconData: widget.isFiltering
+                    //       ? Icons.filter_alt_off_outlined
+                    //       : Icons.filter_alt_outlined,
+                    //   iconSize: 20,
+                    //   iconColor: Colors.white,
+                    //   onTap: widget.setFilter,
+                    // ),
                   ],
                 ),
               )

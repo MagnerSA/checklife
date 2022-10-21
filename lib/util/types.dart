@@ -9,6 +9,13 @@ class TypesController {
     Types.futile: blueColor,
     Types.reminder: yellowColor,
   };
+  final _darkColors = {
+    Types.simple: Colors.grey[700],
+    Types.closed: darkGreenColor,
+    Types.urgent: darkRedColor,
+    Types.futile: darkBlueColor,
+    Types.reminder: darkYellowColor,
+  };
   final _backgroundColors = {
     Types.simple: Colors.white,
     Types.closed: greenColor,
@@ -34,6 +41,10 @@ class TypesController {
 
   getColor(int type) {
     return _colors[type];
+  }
+
+  getDarkColor(int type) {
+    return _darkColors[type];
   }
 
   getTitle(int type) {

@@ -10,10 +10,10 @@ import 'package:checklife/util/formatting.dart';
 import 'package:checklife/models/task.model.dart';
 import 'package:checklife/view/dayPage/widgets/optionsFooter.dart';
 import 'package:checklife/view/dayPage/widgets/realocatingTask.dart';
+import 'package:checklife/view/dayPage/widgets/taskCounter.dart';
+import 'package:checklife/view/dayPage/widgets/taskCreationCard.dart';
 import 'package:checklife/view/dayPage/widgets/topBar.dart';
 import 'package:checklife/widgets/taskCard/main.dart';
-import 'package:checklife/widgets/taskCounter.dart';
-import 'package:checklife/widgets/taskCreationCard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -37,6 +37,14 @@ class _DayPageState extends State<DayPage> {
 
   bool isLoading = true;
   bool isFiltering = false;
+
+  Map<int, bool> filters = {
+    Types.simple: true,
+    Types.closed: true,
+    Types.urgent: true,
+    Types.futile: true,
+    Types.reminder: true,
+  };
 
   List<Task> tasks = [];
   List<int> tasksCounter = [0, 0, 0, 0, 0];
@@ -190,6 +198,16 @@ class _DayPageState extends State<DayPage> {
     _removeTask(i);
   }
 
+  _showTask(Task element) {
+    bool simpleFilter = (filters[element.type] ?? true);
+
+    if (element.closed) {
+      simpleFilter = filters[1] ?? false;
+    }
+
+    return simpleFilter;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -207,6 +225,11 @@ class _DayPageState extends State<DayPage> {
                 navigateToToday: _navigateToToday,
               ),
               TaskCounter(
+                setPageState: () {
+                  setState(() {});
+                },
+                filters: filters,
+                allTasksCount: tasks.length,
                 urgentTasksCount: tasksCounter[Types.urgent],
                 regularTasksCount: tasksCounter[Types.simple],
                 reminderTasksCount: tasksCounter[Types.reminder],
@@ -258,8 +281,7 @@ class _DayPageState extends State<DayPage> {
                     } else {
                       Task element = tasks.elementAt(i);
                       card = Visibility(
-                        visible: (app.compare.isBeforeToday(app.currentDate)) ||
-                            (!isFiltering || !element.closed),
+                        visible: _showTask(element),
                         child: Column(
                           children: [
                             TaskCard(

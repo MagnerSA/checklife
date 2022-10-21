@@ -104,7 +104,7 @@ class _DayCardState extends State<DayCard> {
       child: _widgetCounterRow(
         color: Colors.white,
         numberColor: Colors.white,
-        count: counters[4],
+        count: counters[Types.closed],
         isFinished: true,
       ),
     );

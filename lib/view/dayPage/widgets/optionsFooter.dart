@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:checklife/controllers/application.controller.dart';
 import 'package:flutter/material.dart';
 
 class OptionsFooter extends StatefulWidget {
@@ -21,6 +22,12 @@ class OptionsFooter extends StatefulWidget {
 }
 
 class _OptionsFooterState extends State<OptionsFooter> {
+  ApplicationController app = ApplicationController();
+
+  _isBeforeToday() {
+    return app.compare.isBeforeToday(app.currentDate);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -32,21 +39,23 @@ class _OptionsFooterState extends State<OptionsFooter> {
           icon: const Icon(Icons.keyboard_arrow_left),
         ),
         Expanded(child: Container()),
-        IconButton(
-          onPressed: () {
-            int duration = 500;
+        _isBeforeToday()
+            ? const SizedBox()
+            : IconButton(
+                onPressed: () {
+                  int duration = 500;
 
-            widget.scrollController.animateTo(
-              widget.scrollController.position.maxScrollExtent,
-              duration: Duration(milliseconds: duration),
-              curve: Curves.linear,
-            );
-            Timer(Duration(milliseconds: duration + 100), () {
-              widget.focusNode.requestFocus();
-            });
-          },
-          icon: const Icon(Icons.add, size: 25),
-        ),
+                  widget.scrollController.animateTo(
+                    widget.scrollController.position.maxScrollExtent,
+                    duration: Duration(milliseconds: duration),
+                    curve: Curves.linear,
+                  );
+                  Timer(Duration(milliseconds: duration + 100), () {
+                    widget.focusNode.requestFocus();
+                  });
+                },
+                icon: const Icon(Icons.add, size: 25),
+              ),
         Expanded(child: Container()),
         IconButton(
           onPressed: widget.navigateToTomorrow,
