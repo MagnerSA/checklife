@@ -3,8 +3,10 @@ import 'package:checklife/style/style.dart';
 import 'package:checklife/util/types.dart';
 import 'package:checklife/widgets/squaredIconButton.dart';
 import 'package:checklife/widgets/squaredTextButton.dart';
+import 'package:checklife/widgets/taskCard/ageTab.dart';
 import 'package:checklife/widgets/taskCard/descriptionTab.dart';
 import 'package:checklife/widgets/taskCard/groupTab.dart';
+import 'package:checklife/widgets/taskCard/optionsTab.dart';
 import 'package:checklife/widgets/taskCard/realocateTab.dart';
 import 'package:checklife/widgets/taskCard/typeTab.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -46,6 +48,8 @@ class _TaskCardState extends State<TaskCard> {
   bool isEditing = false;
   bool isModified = false;
   bool isRealocating = false;
+
+  int selectedTab = 0;
 
   enableEdit() {
     setState(() {
@@ -167,15 +171,16 @@ class _TaskCardState extends State<TaskCard> {
   topCard() {
     return Container(
       color: getBackGroundcolor(),
-      height: 50,
+      height: 35,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           isEditing
               ? SquaredIconButton(
                   iconData: Icons.close,
-                  width: 50,
-                  height: 50,
+                  iconSize: 20,
+                  width: 35,
+                  height: 35,
                   onTap: () {
                     setState(() {
                       isEditing = false;
@@ -185,10 +190,11 @@ class _TaskCardState extends State<TaskCard> {
                 )
               : isLoading
                   ? SizedBox(
-                      width: 50,
-                      height: 50,
+                      width: 35,
+                      height: 35,
                       child: SpinKitRing(
-                        color: widget.task.closed
+                        color: widget.task.closed ||
+                                widget.task.type == Types.urgent
                             ? Colors.white
                             : Colors.grey.shade400,
                         lineWidth: 2,
@@ -196,6 +202,7 @@ class _TaskCardState extends State<TaskCard> {
                       ),
                     )
                   : SquaredIconButton(
+                      iconSize: 20,
                       iconData: widget.task.closed
                           ? (isFinishable() ? Icons.check_box : Icons.check)
                           : Icons.check_box_outline_blank,
@@ -205,8 +212,8 @@ class _TaskCardState extends State<TaskCard> {
                       backgroundColor: widget.task.closed
                           ? greenColor
                           : app.types.getBackgroundColor(widget.task.type),
-                      width: 50,
-                      height: 50,
+                      width: 35,
+                      height: 35,
                       onTap: isFinishable() ? finishTask : null,
                     ),
           widget.task.closed
@@ -218,11 +225,19 @@ class _TaskCardState extends State<TaskCard> {
           Expanded(
             flex: 5,
             child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.only(
+                left: 10,
+                right: 10,
+              ),
               child: Center(
                 child: isEditing
                     ? TextFormField(
                         controller: textController,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          height: 1.7,
+                        ),
                         onChanged: (_) {
                           if (!isModified) {
                             setState(() {
@@ -234,7 +249,7 @@ class _TaskCardState extends State<TaskCard> {
                     // : Text(widget.task.title),
                     : SquaredTextButton(
                         fitText: true,
-                        height: 50,
+                        height: 35,
                         text: widget.task.title,
                         onTap: widget.task.closed ? null : enableEdit,
                         textColor: getTextColor(),
@@ -246,9 +261,9 @@ class _TaskCardState extends State<TaskCard> {
           isEditing
               ? SquaredIconButton(
                   iconData: Icons.check,
-                  iconSize: 25,
-                  width: 50,
-                  height: 50,
+                  iconSize: 20,
+                  width: 35,
+                  height: 35,
                   onTap: isModified ? saveChanges : null,
                   iconColor: isModified ? greenColor : Colors.grey[300],
                 )
@@ -257,8 +272,8 @@ class _TaskCardState extends State<TaskCard> {
                       ? Icons.keyboard_arrow_up
                       : Icons.keyboard_arrow_down,
                   iconSize: 25,
-                  width: 50,
-                  height: 50,
+                  width: 35,
+                  height: 35,
                   onTap: setIsOpened,
                   iconColor: getIconColor(),
                 ),
@@ -322,7 +337,39 @@ class _TaskCardState extends State<TaskCard> {
           );
   }
 
-  realocate() {}
+  _getSelectedTab() {
+    Widget result = const SizedBox();
+
+    switch (selectedTab) {
+      case 0:
+        result = RealocateTab(
+          setStatePage: widget.setPageState,
+          task: widget.task,
+        );
+        break;
+      case 1:
+        result = TypeTab(
+          setStatePage: widget.setPageState,
+          task: widget.task,
+          countTasks: widget.countTasks,
+        );
+        break;
+      case 2:
+        result = AgeTab(
+          task: widget.task,
+          deleteTask: () {},
+        );
+        break;
+      default:
+    }
+    return result;
+  }
+
+  _changeSelectedTab(int newTab) {
+    setState(() {
+      selectedTab = newTab;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -345,18 +392,17 @@ class _TaskCardState extends State<TaskCard> {
                           deleteTask();
                         },
                       ),
-                      TypeTab(
-                        setStatePage: widget.setPageState,
+                      OptionsTab(
+                        selectedTab: selectedTab,
                         task: widget.task,
-                        countTasks: widget.countTasks,
+                        changeSelectedTab: _changeSelectedTab,
                       ),
+
+                      _getSelectedTab(),
+
                       // GroupTab(
                       //   task: widget.task,
                       // ),
-                      RealocateTab(
-                        setStatePage: widget.setPageState,
-                        task: widget.task,
-                      )
                     ]
                   : []),
               // bottomOptions(),

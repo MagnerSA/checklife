@@ -9,7 +9,7 @@ import '../models/task.model.dart';
 
 class ApplicationController {
   DateTime now = DateTime.now()
-      .subtract(const Duration(hours: 3))
+      .subtract(const Duration(hours: 0))
       .add(const Duration(days: 0));
   late DateTime today = DateTime(now.year, now.month, now.day);
   late DateTime currentDate = DateTime(now.year, now.month, now.day);

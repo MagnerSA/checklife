@@ -10,6 +10,6 @@ const Color darkGreenColor = Color.fromARGB(255, 92, 167, 86);
 const Color redColor = Color(0xFFFF7970);
 const Color darkRedColor = Color.fromARGB(255, 163, 76, 70);
 const Color backgroundColor = Color(0xFFEFEFEF);
-const Color yellowColor = Colors.yellow;
+const Color yellowColor = Color.fromARGB(255, 238, 218, 38);
 const Color darkYellowColor = Color.fromARGB(255, 170, 138, 51);
 Color greyColor = Colors.grey.shade400;
