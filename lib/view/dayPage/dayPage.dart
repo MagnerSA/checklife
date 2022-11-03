@@ -56,8 +56,10 @@ class _DayPageState extends State<DayPage> {
   }
 
   loadTasks() async {
-    isLoading = true;
-    tasks.clear();
+    setState(() {
+      isLoading = true;
+      tasks.clear();
+    });
 
     tasks = await service.getTasks(app.currentDate);
 
@@ -228,6 +230,10 @@ class _DayPageState extends State<DayPage> {
                 setPageState: () {
                   setState(() {});
                 },
+                reloadTasks: () {
+                  loadTasks();
+                },
+                isLoadingTasks: isLoading,
                 filters: filters,
                 allTasksCount: tasks.length,
                 urgentTasksCount: tasksCounter[Types.urgent],

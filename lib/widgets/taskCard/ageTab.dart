@@ -196,103 +196,103 @@ class _AgeTabState extends State<AgeTab> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // // Expanded(
+          // //   flex: 5,
+          // //   child: Center(
+          // //     child: Text(age == 0
+          // //         ? (widget.task.closed
+          // //             ? "Finalizada ${app.compare.isSameDay(app.today, DateTime.parse(widget.task.closedAt)) ? "hoje" : "no mesmo dia"}"
+          // //             : "Criada hoje")
+          // //         : text),
+          // //   ),
+          // // ),
+          // // Expanded(
+          // //   child: Center(
+          // //     child: Text(
+          // //       widget.task.description == ""
+          // //           ? "Adicionar descrição"
+          // //           : widget.task.description ?? "",
+          // //     ),
+          // //   ),
+          // // ),
+
+          // SizedBox(
+          //   width: isLoading ? 50 : 0,
+          //   height: isLoading ? 50 : 0,
+          // ),
+          // !isEditing && !isLoading
+          //     ? SquaredIconButton(
+          //         iconData: Icons.delete_outline,
+          //         width: 50,
+          //         height: 50,
+          //         onTap: widget.deleteTask,
+          //         iconColor: redColor,
+          //       )
+          //     : const SizedBox(),
+          // isEditing && !isLoading
+          //     ? SquaredIconButton(
+          //         iconData: Icons.close,
+          //         width: 50,
+          //         height: 50,
+          //         onTap: () {
+          //           setState(() {
+          //             isEditing = false;
+          //           });
+          //         },
+          //         iconColor: redColor,
+          //       )
+          //     : const SizedBox(),
           // Expanded(
           //   flex: 5,
-          //   child: Center(
-          //     child: Text(age == 0
-          //         ? (widget.task.closed
-          //             ? "Finalizada ${app.compare.isSameDay(app.today, DateTime.parse(widget.task.closedAt)) ? "hoje" : "no mesmo dia"}"
-          //             : "Criada hoje")
-          //         : text),
-          //   ),
-          // ),
-          // Expanded(
-          //   child: Center(
-          //     child: Text(
-          //       widget.task.description == ""
-          //           ? "Adicionar descrição"
-          //           : widget.task.description ?? "",
+          //   child: Padding(
+          //     padding: const EdgeInsets.all(10),
+          //     child: Center(
+          //       child: isEditing
+          //           ? TextFormField(
+          //               controller: textController,
+          //               onChanged: (_) {
+          //                 if (!isModified) {
+          //                   setState(() {
+          //                     isModified = true;
+          //                   });
+          //                 }
+          //               },
+          //             )
+          //           // : Text(widget.task.title),
+          //           : SquaredTextButton(
+          //               text: widget.task.description == ""
+          //                   ? "Adicionar descrição"
+          //                   : widget.task.description,
+          //               textColor: widget.task.description == ""
+          //                   ? Colors.grey[400]
+          //                   : Colors.black,
+          //               onTap: enableEdit,
+          //             ),
           //     ),
           //   ),
           // ),
-
-          SizedBox(
-            width: isLoading ? 50 : 0,
-            height: isLoading ? 50 : 0,
-          ),
-          !isEditing && !isLoading
-              ? SquaredIconButton(
-                  iconData: Icons.delete_outline,
-                  width: 50,
-                  height: 50,
-                  onTap: widget.deleteTask,
-                  iconColor: redColor,
-                )
-              : const SizedBox(),
-          isEditing && !isLoading
-              ? SquaredIconButton(
-                  iconData: Icons.close,
-                  width: 50,
-                  height: 50,
-                  onTap: () {
-                    setState(() {
-                      isEditing = false;
-                    });
-                  },
-                  iconColor: redColor,
-                )
-              : const SizedBox(),
-          Expanded(
-            flex: 5,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Center(
-                child: isEditing
-                    ? TextFormField(
-                        controller: textController,
-                        onChanged: (_) {
-                          if (!isModified) {
-                            setState(() {
-                              isModified = true;
-                            });
-                          }
-                        },
-                      )
-                    // : Text(widget.task.title),
-                    : SquaredTextButton(
-                        text: widget.task.description == ""
-                            ? "Adicionar descrição"
-                            : widget.task.description,
-                        textColor: widget.task.description == ""
-                            ? Colors.grey[400]
-                            : Colors.black,
-                        onTap: enableEdit,
-                      ),
-              ),
-            ),
-          ),
-          isEditing
-              ? SquaredIconButton(
-                  iconData: Icons.check,
-                  iconSize: 25,
-                  width: 50,
-                  height: 50,
-                  onTap: isModified ? saveChanges : () {},
-                  iconColor: isModified ? greenColor : Colors.grey[300],
-                )
-              : SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: Center(
-                    child: Text(
-                      getAge(),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-                )
+          // isEditing
+          //     ? SquaredIconButton(
+          //         iconData: Icons.check,
+          //         iconSize: 25,
+          //         width: 50,
+          //         height: 50,
+          //         onTap: isModified ? saveChanges : () {},
+          //         iconColor: isModified ? greenColor : Colors.grey[300],
+          //       )
+          //     : SizedBox(
+          //         width: 50,
+          //         height: 50,
+          //         child: Center(
+          //           child: Text(
+          //             getAge(),
+          //             textAlign: TextAlign.center,
+          //             style: const TextStyle(
+          //               fontSize: 10,
+          //             ),
+          //           ),
+          //         ),
+          //       )
         ],
       ),
     );

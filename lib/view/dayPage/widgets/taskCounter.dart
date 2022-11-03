@@ -14,6 +14,8 @@ class TaskCounter extends StatefulWidget {
   final int allTasksCount;
   final Function setPageState;
   final Map<int, bool> filters;
+  final void Function() reloadTasks;
+  final bool isLoadingTasks;
 
   const TaskCounter({
     Key? key,
@@ -25,6 +27,8 @@ class TaskCounter extends StatefulWidget {
     required this.allTasksCount,
     required this.setPageState,
     required this.filters,
+    required this.reloadTasks,
+    required this.isLoadingTasks,
   }) : super(key: key);
 
   @override
@@ -142,6 +146,29 @@ class _TaskCounterState extends State<TaskCounter> {
                     color: Colors.grey.shade400,
                     type: -1,
                   ),
+            Padding(
+              padding: const EdgeInsets.all(5),
+              child: InkWell(
+                onTap: widget.reloadTasks,
+                borderRadius: BorderRadius.circular(50),
+                child: Ink(
+                  height: 20,
+                  width: 20,
+                  decoration: BoxDecoration(
+                    color:
+                        widget.isLoadingTasks ? primaryColor : secondaryColor,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      widget.isLoadingTasks ? Icons.more_horiz : Icons.refresh,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

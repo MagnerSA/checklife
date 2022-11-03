@@ -104,11 +104,11 @@ class _TaskCardState extends State<TaskCard> {
     await widget.removeTask();
     await app.taskService.deleteTask(widget.task.id);
 
-    // setState(() {
-    //   isEditing = false;
-    //   isOpened = false;
-    //   isLoading = false;
-    // });
+    setState(() {
+      // isEditing = false;
+      isOpened = false;
+      isLoading = false;
+    });
   }
 
   setIsOpened() {
