@@ -1,16 +1,18 @@
-# checklife
+# Checklife
 
-A new Flutter project.
+Uma checklist criada para ajudar aqueles que precisam de um bom sistema de organização pessoal.
 
-## Getting Started
+## Funcionalidades
 
-This project is a starting point for a Flutter application.
+As funcionalidades da aplicação atualmente são:
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Login;
+- Logout;
+- Criar tarefa;
+- Finalizar tarefa;
+- Remover tarefa;
+- Visualizar tarefas;
+- Editar tarefa;
+- Filtrar tarefas visualizadas;
+- Realocar tarefa;
+- Classificar tarefa.
