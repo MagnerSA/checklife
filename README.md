@@ -1,4 +1,4 @@
-<img src="/assets/images/Icon.png" alt="drawing" width="200" selfAlign="center"/>
+<img src="/assets/images/Banner.png" alt="drawing" width="100%" selfAlign="center"/>
 
 # Checklife
 
