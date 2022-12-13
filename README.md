@@ -1,4 +1,4 @@
-![Alt text](/assets/Icon.png)
+![Alt text](/assets/images/Icon.png)
 # Checklife
 
 Uma checklist criada para ajudar aqueles que precisam de um bom sistema de organização pessoal.
