@@ -1,7 +1,15 @@
 import 'package:checklife/services/task.service.dart';
 import 'package:checklife/style/style.dart';
+import 'package:checklife/util/types.dart';
+import 'package:checklife/widgets/squaredIconButton.dart';
+import 'package:checklife/widgets/squaredTextButton.dart';
 import 'package:checklife/widgets/taskCard/ageTab.dart';
+import 'package:checklife/widgets/taskCard/descriptionTab.dart';
+import 'package:checklife/widgets/taskCard/groupTab.dart';
+import 'package:checklife/widgets/taskCard/optionsTab.dart';
 import 'package:checklife/widgets/taskCard/realocateTab.dart';
+import 'package:checklife/widgets/taskCard/subTasksTab.dart';
+import 'package:checklife/widgets/taskCard/typeTab.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -12,14 +20,14 @@ import '../../../../util/formatting.dart';
 
 class TaskCard extends StatefulWidget {
   final Task task;
-  final Function deleteTask;
+  final Function removeTask;
   final Function countTasks;
   final Function setPageState;
 
   const TaskCard({
     Key? key,
     required this.task,
-    required this.deleteTask,
+    required this.removeTask,
     required this.countTasks,
     required this.setPageState,
   }) : super(key: key);
@@ -42,11 +50,17 @@ class _TaskCardState extends State<TaskCard> {
   bool isModified = false;
   bool isRealocating = false;
 
+  int selectedTab = 1;
+
   enableEdit() {
     setState(() {
       isEditing = true;
       textController.text = widget.task.title;
     });
+  }
+
+  isFinishable() {
+    return !app.compare.isBeforeToday(app.currentDate);
   }
 
   finishTask() async {
@@ -61,22 +75,26 @@ class _TaskCardState extends State<TaskCard> {
       newClosedAt = formatting.formatDate(app.today);
     }
 
-    await bd
-        .collection("users")
-        .doc(app.userService.currentUserID())
-        .collection("tasks")
-        .doc(widget.task.id)
-        .update({
-      "closedAt": newClosedAt,
-      "closed": newClosed,
-    });
+    if (app.compare.isToday(app.currentDate)) {
+      await app.taskService.finishTask(widget.task, newClosed, newClosedAt);
 
-    setState(() {
+      setState(() {
+        widget.task.closed = newClosed;
+        widget.task.closedAt = newClosedAt;
+        widget.countTasks();
+        isLoading = false;
+      });
+    } else {
       widget.task.closed = newClosed;
       widget.task.closedAt = newClosedAt;
-      widget.countTasks();
-      isLoading = false;
-    });
+      await app.taskService.realocateTask(widget.task, app.today);
+      // await app.taskService.finishTask(widget.task, newClosed, newClosedAt);
+      await widget.removeTask();
+      setState(() {
+        widget.countTasks();
+        isLoading = false;
+      });
+    }
   }
 
   deleteTask() async {
@@ -84,10 +102,11 @@ class _TaskCardState extends State<TaskCard> {
       isLoading = true;
     });
 
-    await widget.deleteTask();
+    await widget.removeTask();
+    await app.taskService.deleteTask(widget.task.id);
 
     setState(() {
-      isEditing = false;
+      // isEditing = false;
       isOpened = false;
       isLoading = false;
     });
@@ -119,43 +138,129 @@ class _TaskCardState extends State<TaskCard> {
     });
   }
 
+  getColor() {}
+
+  Color getBackGroundcolor() {
+    Color backgroundColor = Colors.white;
+
+    if (widget.task.type == Types.urgent) backgroundColor = redColor;
+    if (widget.task.closed) backgroundColor = greenColor;
+
+    return backgroundColor;
+  }
+
+  getTextColor() {
+    Color textColor = Colors.black;
+
+    if (widget.task.closed || widget.task.type == Types.urgent) {
+      textColor = Colors.white;
+    }
+
+    return textColor;
+  }
+
+  getIconColor() {
+    Color iconColor = Colors.grey.shade500;
+
+    if (widget.task.closed || widget.task.type == Types.urgent) {
+      iconColor = Colors.white;
+    }
+
+    return iconColor;
+  }
+
+  isGroup() {
+    return widget.task.groupStatus == "group";
+  }
+
   topCard() {
     return Container(
-      color: Colors.white,
+      color: getBackGroundcolor(),
+      height: 35,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            flex: 1,
-            child: isLoading
-                ? SpinKitRing(
-                    color: widget.task.closed
-                        ? secondaryColor
-                        : Colors.grey.shade400,
-                    lineWidth: 2,
-                    size: 15,
-                  )
-                : IconButton(
-                    onPressed: finishTask,
-                    icon: Icon(
-                      widget.task.closed
-                          ? Icons.check_box
-                          : Icons.check_box_outline_blank,
-                      size: 25,
-                      color: widget.task.closed
-                          ? secondaryColor
-                          : Colors.grey.shade400,
-                    ),
-                  ),
+          Visibility(
+            visible: isEditing,
+            child: SquaredIconButton(
+              iconData: Icons.close,
+              iconSize: 20,
+              width: 35,
+              height: 35,
+              onTap: () {
+                setState(() {
+                  isEditing = false;
+                });
+              },
+              iconColor: redColor,
+            ),
           ),
+          Visibility(
+            visible: !isEditing && isLoading,
+            child: SizedBox(
+              width: 35,
+              height: 35,
+              child: SpinKitRing(
+                color: widget.task.closed || widget.task.type == Types.urgent
+                    ? Colors.white
+                    : Colors.grey.shade400,
+                lineWidth: 2,
+                size: 20,
+              ),
+            ),
+          ),
+          Visibility(
+            visible: !isEditing && !isLoading && isGroup(),
+            child: SquaredIconButton(
+              iconData: Icons.checklist,
+              iconSize: 20,
+              width: 35,
+              height: 35,
+              iconColor: widget.task.closed
+                  ? Colors.white
+                  : app.types.getContrastColor(widget.task.type),
+            ),
+          ),
+          Visibility(
+            visible: !isEditing && !isLoading && !isGroup(),
+            child: SquaredIconButton(
+              iconSize: 20,
+              iconData: widget.task.closed
+                  ? (isFinishable() ? Icons.check_box : Icons.check)
+                  : Icons.check_box_outline_blank,
+              iconColor: widget.task.closed
+                  ? Colors.white
+                  : app.types.getContrastColor(widget.task.type),
+              backgroundColor: widget.task.closed
+                  ? greenColor
+                  : app.types.getBackgroundColor(widget.task.type),
+              width: 35,
+              height: 35,
+              onTap: isFinishable() ? finishTask : null,
+            ),
+          ),
+          widget.task.closed
+              ? Container(
+                  color: app.types.getBackgroundColor(widget.task.type),
+                  width: 5,
+                )
+              : const SizedBox(),
           Expanded(
             flex: 5,
             child: Padding(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.only(
+                left: 10,
+                right: 10,
+              ),
               child: Center(
                 child: isEditing
                     ? TextFormField(
                         controller: textController,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          height: 1.7,
+                        ),
                         onChanged: (_) {
                           if (!isModified) {
                             setState(() {
@@ -164,21 +269,37 @@ class _TaskCardState extends State<TaskCard> {
                           }
                         },
                       )
-                    : Text(widget.task.title),
+                    // : Text(widget.task.title),
+                    : SquaredTextButton(
+                        fitText: true,
+                        height: 35,
+                        text: widget.task.title,
+                        onTap: widget.task.closed ? null : enableEdit,
+                        textColor: getTextColor(),
+                      ),
               ),
             ),
           ),
-          Expanded(
-            flex: 1,
-            child: IconButton(
-              onPressed: setIsOpened,
-              icon: Icon(
-                isOpened ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                size: 25,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ),
+          SizedBox(width: widget.task.closed ? 5 : 0),
+          isEditing
+              ? SquaredIconButton(
+                  iconData: Icons.check,
+                  iconSize: 20,
+                  width: 35,
+                  height: 35,
+                  onTap: isModified ? saveChanges : null,
+                  iconColor: isModified ? greenColor : Colors.grey[300],
+                )
+              : SquaredIconButton(
+                  iconData: isOpened
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  iconSize: 25,
+                  width: 35,
+                  height: 35,
+                  onTap: setIsOpened,
+                  iconColor: getIconColor(),
+                ),
         ],
       ),
     );
@@ -239,106 +360,45 @@ class _TaskCardState extends State<TaskCard> {
           );
   }
 
-  bottomOptions() {
-    return isOpened
-        ? Container(
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                top: BorderSide(
-                  color: Colors.grey.shade300,
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                isEditing && !isLoading
-                    ? Material(
-                        type: MaterialType.transparency,
-                        child: InkWell(
-                          onTap: deleteTask,
-                          child: Ink(
-                            width: 50,
-                            child: const Center(
-                              child: Icon(
-                                Icons.delete_outline,
-                                size: 20,
-                                color: redColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    : const SizedBox(),
-                Expanded(
-                  child: Container(),
-                ),
-                isEditing && !isLoading
-                    ? Material(
-                        type: MaterialType.transparency,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              isEditing = false;
-                            });
-                          },
-                          child: Ink(
-                              width: 50,
-                              child: const Center(
-                                child: Icon(
-                                  Icons.close,
-                                  size: 20,
-                                  color: redColor,
-                                ),
-                              )),
-                        ),
-                      )
-                    : const SizedBox(),
-                !isEditing
-                    ? Material(
-                        type: MaterialType.transparency,
-                        child: InkWell(
-                          onTap: enableEdit,
-                          child: Ink(
-                            width: 50,
-                            child: const Center(
-                              child: Icon(
-                                Icons.edit_outlined,
-                                size: 20,
-                                color: primaryColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    : const SizedBox(),
-                isModified && isEditing
-                    ? Material(
-                        type: MaterialType.transparency,
-                        child: InkWell(
-                          onTap: saveChanges,
-                          child: Ink(
-                            width: 50,
-                            child: const Center(
-                              child: Icon(
-                                Icons.check,
-                                size: 20,
-                                color: greenColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    : const SizedBox(),
-              ],
-            ),
-          )
-        : Container();
+  _getSelectedTab() {
+    Widget result = const SizedBox();
+
+    switch (selectedTab) {
+      case 0:
+        if (isGroup()) {
+          result =
+              SubTasksTab(task: widget.task, setPageState: widget.setPageState);
+        } else {
+          result = GroupTab(
+            task: widget.task,
+            setPageState: widget.setPageState,
+          );
+        }
+
+        break;
+      case 1:
+        result = RealocateTab(
+          setStatePage: widget.setPageState,
+          task: widget.task,
+        );
+        break;
+      case 2:
+        result = TypeTab(
+          setStatePage: widget.setPageState,
+          task: widget.task,
+          countTasks: widget.countTasks,
+        );
+        break;
+      default:
+    }
+    return result;
   }
 
-  realocate() {}
+  _changeSelectedTab(int newTab) {
+    setState(() {
+      selectedTab = newTab;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -355,16 +415,26 @@ class _TaskCardState extends State<TaskCard> {
               topCard(),
               ...(isOpened
                   ? [
-                      AgeTab(
+                      DescriptionTab(
                         task: widget.task,
+                        deleteTask: () {
+                          deleteTask();
+                        },
                       ),
-                      RealocateTab(
-                        setStatePage: widget.setPageState,
+                      OptionsTab(
+                        selectedTab: selectedTab,
                         task: widget.task,
-                      )
+                        changeSelectedTab: _changeSelectedTab,
+                      ),
+
+                      _getSelectedTab(),
+
+                      // GroupTab(
+                      //   task: widget.task,
+                      // ),
                     ]
                   : []),
-              bottomOptions(),
+              // bottomOptions(),
             ],
           ),
         ),

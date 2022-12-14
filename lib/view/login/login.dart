@@ -59,6 +59,8 @@ class _LoginState extends State<Login> {
         text: "Login",
         height: 50,
         onTap: login,
+        fontWeight: FontWeight.w500,
+        textColor: Colors.white,
         color: loginFailed ? redColor : primaryColor,
       ),
     );

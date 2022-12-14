@@ -53,9 +53,11 @@ class _RealocateTabState extends State<RealocateTab> {
                         type: MaterialType.transparency,
                         child: InkWell(
                           onTap: () {
-                            setState(() {
-                              isShowingOptions = true;
-                            });
+                            setRealocatedDay();
+
+                            // setState(() {
+                            //   isShowingOptions = true;
+                            // });
                           },
                           child: Ink(
                             child: const Center(

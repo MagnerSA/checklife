@@ -69,7 +69,7 @@ class _SplashState extends State<Splash> {
                 child: AnimatedContainer(
                   height: containerSize,
                   width: containerSize,
-                  duration: const Duration(milliseconds: 1000),
+                  duration: const Duration(milliseconds: 750),
                   curve: Curves.bounceOut,
                   child: SvgPicture.asset(
                     'assets/images/AppLogoWhite.svg',

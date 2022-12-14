@@ -8,16 +8,47 @@ class SquaredTextButton extends StatefulWidget {
   final double? height;
   final String? text;
   final Color? color;
+  final Color? textColor;
+  final FontWeight? fontWeight;
+  final double? textSize;
+  final bool? fitText;
 
-  const SquaredTextButton(
-      {Key? key, this.onTap, this.width, this.height, this.text, this.color})
-      : super(key: key);
+  const SquaredTextButton({
+    Key? key,
+    this.onTap,
+    this.width,
+    this.height,
+    this.text,
+    this.color,
+    this.textColor,
+    this.fontWeight,
+    this.textSize,
+    this.fitText,
+  }) : super(key: key);
 
   @override
   State<SquaredTextButton> createState() => _SquaredTextButtonState();
 }
 
 class _SquaredTextButtonState extends State<SquaredTextButton> {
+  _widgetText() {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 10,
+        right: 10,
+      ),
+      child: Text(
+        widget.text ?? "",
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: widget.textColor,
+          fontSize: 14,
+          fontWeight: widget.fontWeight,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -29,14 +60,12 @@ class _SquaredTextButtonState extends State<SquaredTextButton> {
           width: widget.width,
           height: widget.height,
           child: Center(
-            child: Text(
-              widget.text ?? "",
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: widget.fitText ?? false
+                ? FittedBox(
+                    fit: BoxFit.fill,
+                    child: _widgetText(),
+                  )
+                : _widgetText(),
           ),
         ),
       ),

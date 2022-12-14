@@ -1,6 +1,6 @@
 import 'package:checklife/controllers/application.controller.dart';
 import 'package:checklife/style/style.dart';
-import 'package:checklife/view/calendarPage.dart';
+import 'package:checklife/view/calendarPage/calendarPage.dart';
 import 'package:checklife/view/dayPage/dayPage.dart';
 import 'package:checklife/view/login/login.dart';
 import 'package:checklife/view/splash/splash.dart';

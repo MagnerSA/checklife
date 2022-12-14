@@ -4,14 +4,16 @@ import 'package:checklife/controllers/application.controller.dart';
 import 'package:checklife/services/task.service.dart';
 import 'package:checklife/style/style.dart';
 import 'package:checklife/util/comparing.dart';
-import 'package:checklife/view/calendarPage.dart';
+import 'package:checklife/util/types.dart';
+import 'package:checklife/view/calendarPage/calendarPage.dart';
 import 'package:checklife/util/formatting.dart';
 import 'package:checklife/models/task.model.dart';
 import 'package:checklife/view/dayPage/widgets/optionsFooter.dart';
 import 'package:checklife/view/dayPage/widgets/realocatingTask.dart';
+import 'package:checklife/view/dayPage/widgets/taskCounter.dart';
+import 'package:checklife/view/dayPage/widgets/taskCreationCard.dart';
+import 'package:checklife/view/dayPage/widgets/topBar.dart';
 import 'package:checklife/widgets/taskCard/main.dart';
-import 'package:checklife/widgets/taskCounter.dart';
-import 'package:checklife/widgets/taskCreationCard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -29,15 +31,23 @@ class _DayPageState extends State<DayPage> {
   ApplicationController app = ApplicationController();
   TaskService service = TaskService();
 
-  TextEditingController textController = TextEditingController();
   ScrollController scrollController = ScrollController();
+  TextEditingController textController = TextEditingController();
   FocusNode focusNode = FocusNode();
 
   bool isLoading = true;
-  bool filter = false;
+  bool isFiltering = false;
+
+  Map<int, bool> filters = {
+    Types.simple: true,
+    Types.closed: true,
+    Types.urgent: true,
+    Types.futile: true,
+    Types.reminder: true,
+  };
 
   List<Task> tasks = [];
-  List<int> tasksCounter = [0, 0];
+  List<int> tasksCounter = [0, 0, 0, 0, 0];
 
   @override
   initState() {
@@ -46,12 +56,21 @@ class _DayPageState extends State<DayPage> {
   }
 
   loadTasks() async {
-    isLoading = true;
-    tasks.clear();
+    setState(() {
+      isLoading = true;
+      tasks.clear();
+    });
 
     tasks = await service.getTasks(app.currentDate);
 
-    DateTime lastUpdate = await service.getLastUpdate();
+    String lastUpdateString = await service.getLastUpdate();
+    if (lastUpdateString == "") {
+      await service.setLastUpdate(app.currentDate);
+
+      lastUpdateString = app.formatting.formatDate(app.today);
+    }
+
+    DateTime lastUpdate = DateTime.parse(lastUpdateString);
 
     if (lastUpdate.isBefore(app.currentDate) &&
         app.compare.isSameDay(app.today, app.currentDate)) {
@@ -65,14 +84,13 @@ class _DayPageState extends State<DayPage> {
   }
 
   countTasks() {
-    tasksCounter[0] = 0;
-    tasksCounter[1] = 0;
+    tasksCounter = [0, 0, 0, 0, 0];
 
     for (var element in tasks) {
       if (element.closed) {
-        tasksCounter[0]++;
+        tasksCounter[Types.closed]++;
       } else {
-        tasksCounter[1]++;
+        tasksCounter[element.type]++;
       }
     }
 
@@ -106,7 +124,7 @@ class _DayPageState extends State<DayPage> {
     loadTasks();
   }
 
-  navigateToCalendar() {
+  _navigateToCalendar() {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const CalendarPage()),
@@ -114,12 +132,11 @@ class _DayPageState extends State<DayPage> {
     );
   }
 
-  navigateToLogin() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => Login()),
-      (Route<dynamic> route) => false,
-    );
+  _navigateToToday() {
+    setState(() {
+      app.setCurrentDate(app.today);
+      loadTasks();
+    });
   }
 
   navigateToTomorrow() {
@@ -140,12 +157,6 @@ class _DayPageState extends State<DayPage> {
     });
   }
 
-  setFilter() {
-    setState(() {
-      filter = !filter;
-    });
-  }
-
   createTask() async {
     Task newTask = Task(
       date: "",
@@ -155,6 +166,9 @@ class _DayPageState extends State<DayPage> {
       description: "",
       closedAt: "",
       createdAt: app.formatting.formatDate(app.today),
+      type: 0,
+      groupStatus: "",
+      groupID: "",
     );
 
     newTask = await service.createTask(newTask, app.currentDate);
@@ -170,10 +184,32 @@ class _DayPageState extends State<DayPage> {
     tasks.add(newTask);
   }
 
-  logout() {
-    app.userService.logout();
+  setFilter() {
+    setState(() {
+      isFiltering = !isFiltering;
+    });
+  }
 
-    navigateToLogin();
+  _removeTask(int i) {
+    setState(() {
+      tasks.removeAt(i);
+      countTasks();
+    });
+  }
+
+  _deleteTask(Task element, int i) async {
+    await service.deleteTask(element.id);
+    _removeTask(i);
+  }
+
+  _showTask(Task element) {
+    bool simpleFilter = (filters[element.type] ?? true);
+
+    if (element.closed) {
+      simpleFilter = filters[1] ?? false;
+    }
+
+    return simpleFilter;
   }
 
   @override
@@ -184,82 +220,29 @@ class _DayPageState extends State<DayPage> {
         body: Center(
           child: Column(
             children: [
-              Container(
-                color: primaryColor,
-                height: 75,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: IconButton(
-                        onPressed: logout,
-                        icon: const Icon(
-                          Icons.logout,
-                          color: Colors.white,
-                          size: 25,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 50),
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Center(
-                            child: Text(
-                              "${app.formatting.getWeekDay(app.currentDate)}, ${app.formatting.dayAndMonth(app.currentDate)}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Center(
-                            child: Text(
-                              app.formatting
-                                  .getRelativeDayDescription(app.currentDate),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: IconButton(
-                        onPressed: setFilter,
-                        icon: Icon(
-                          filter
-                              ? Icons.filter_alt_off_outlined
-                              : Icons.filter_alt_outlined,
-                          color: Colors.white,
-                          size: 25,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: IconButton(
-                        onPressed: navigateToCalendar,
-                        icon: const Icon(
-                          Icons.calendar_month,
-                          color: Colors.white,
-                          size: 25,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              TopBar(
+                isFiltering: isFiltering,
+                setPageState: () {
+                  setState(() {});
+                },
+                setFilter: setFilter,
+                navigateToToday: _navigateToToday,
               ),
               TaskCounter(
-                closedTasksCount: tasksCounter[0],
-                regularTasksCount: tasksCounter[1],
+                setPageState: () {
+                  setState(() {});
+                },
+                reloadTasks: () {
+                  loadTasks();
+                },
+                isLoadingTasks: isLoading,
+                filters: filters,
+                allTasksCount: tasks.length,
+                urgentTasksCount: tasksCounter[Types.urgent],
+                regularTasksCount: tasksCounter[Types.simple],
+                reminderTasksCount: tasksCounter[Types.reminder],
+                futileTasksCount: tasksCounter[Types.futile],
+                closedTasksCount: tasksCounter[Types.closed],
               ),
               Visibility(
                 visible: isLoading,
@@ -306,17 +289,12 @@ class _DayPageState extends State<DayPage> {
                     } else {
                       Task element = tasks.elementAt(i);
                       card = Visibility(
-                        visible: (app.compare.isBeforeToday(app.currentDate)) ||
-                            (!filter || !element.closed),
+                        visible: _showTask(element),
                         child: Column(
                           children: [
                             TaskCard(
-                                deleteTask: () async {
-                                  await service.deleteTask(element.id);
-                                  setState(() {
-                                    tasks.removeAt(i);
-                                    countTasks();
-                                  });
+                                removeTask: () {
+                                  _removeTask(i);
                                 },
                                 task: element,
                                 countTasks: countTasks,

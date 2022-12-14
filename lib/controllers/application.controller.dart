@@ -1,13 +1,15 @@
+import 'package:checklife/controllers/navigation.controller.dart';
 import 'package:checklife/services/task.service.dart';
 import 'package:checklife/services/user.service.dart';
 import 'package:checklife/util/comparing.dart';
 import 'package:checklife/util/formatting.dart';
+import 'package:checklife/util/types.dart';
 
 import '../models/task.model.dart';
 
 class ApplicationController {
   DateTime now = DateTime.now()
-      .subtract(const Duration(hours: 3))
+      .subtract(const Duration(hours: 0))
       .add(const Duration(days: 0));
   late DateTime today = DateTime(now.year, now.month, now.day);
   late DateTime currentDate = DateTime(now.year, now.month, now.day);
@@ -27,6 +29,8 @@ class ApplicationController {
   Formatting formatting = Formatting();
   TaskService taskService = TaskService();
   UserService userService = UserService();
+  NavigationController navigate = NavigationController();
+  TypesController types = TypesController();
 
   setCurrentDate(DateTime newDate) {
     currentDate = DateTime(newDate.year, newDate.month, newDate.day);
