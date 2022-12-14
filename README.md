@@ -18,3 +18,7 @@ As funcionalidades da aplicação atualmente são:
 - Filtrar tarefas visualizadas;
 - Realocar tarefa;
 - Classificar tarefa.
+
+## Instalação
+
+O aplicativo pode ser baixado e instalado em sistemas Android (até o momento) através do APK que se encontra na pasta APK do projeto. 
