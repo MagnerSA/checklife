@@ -3,22 +3,27 @@ import 'package:checklife/models/task.model.dart';
 import 'package:checklife/widgets/squaredTextButton.dart';
 import 'package:flutter/material.dart';
 
-class GroupTab extends StatefulWidget {
+import '../../view/dayPage/widgets/taskCreationCard.dart';
+
+class SubTasksTab extends StatefulWidget {
   final Task task;
   final Function setPageState;
 
-  const GroupTab({
+  const SubTasksTab({
     Key? key,
     required this.task,
     required this.setPageState,
   }) : super(key: key);
 
   @override
-  State<GroupTab> createState() => _GroupTabState();
+  State<SubTasksTab> createState() => _SubTasksTabState();
 }
 
-class _GroupTabState extends State<GroupTab> {
+class _SubTasksTabState extends State<SubTasksTab> {
   ApplicationController app = ApplicationController();
+
+  TextEditingController textController = TextEditingController();
+  FocusNode focusNode = FocusNode();
 
   bottomCard() {
     int age = -1;
@@ -52,7 +57,6 @@ class _GroupTabState extends State<GroupTab> {
 
     turnIntoGroup() {
       widget.task.groupStatus = "group";
-      widget.task.groupID = widget.task.id;
       app.taskService.turnIntoGroup(widget.task);
 
       setState(() {
@@ -87,8 +91,41 @@ class _GroupTabState extends State<GroupTab> {
     );
   }
 
+  createTask() async {
+    Task newTask = Task(
+      date: "",
+      title: textController.text,
+      id: "",
+      closed: false,
+      description: "",
+      closedAt: "",
+      createdAt: app.formatting.formatDate(app.today),
+      type: 0,
+      groupStatus: "subtask",
+      groupID: widget.task.id,
+    );
+
+    newTask = await app.taskService
+        .createSubTask(newTask, app.currentDate, widget.task.groupID);
+    // tasks.add(newTask);
+
+    setState(() {
+      // countTasks();
+      textController.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return bottomCard();
+    return Column(
+      children: [
+        TaskCreationCard(
+          focusNode: focusNode,
+          createTask: createTask,
+          textController: textController,
+          text: "Criar subtarefa",
+        )
+      ],
+    );
   }
 }

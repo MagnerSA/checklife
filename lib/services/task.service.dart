@@ -28,6 +28,24 @@ class TaskService {
     return tasks;
   }
 
+  getSubTasks(String groupID) async {
+    var collection = await bd
+        .collection("users")
+        .doc(auth.currentUser?.uid)
+        .collection("subtasks")
+        .where("groupID", isEqualTo: groupID)
+        .get();
+
+    List<Task> subtasks = [];
+
+    for (var doc in collection.docs) {
+      Task task = Task.fromMap(doc.data());
+      subtasks.add(task);
+    }
+
+    return subtasks;
+  }
+
   getPendentTasks(DateTime date) async {
     var collection = await bd
         .collection("users")
@@ -64,6 +82,8 @@ class TaskService {
       description: task.description,
       closedAt: task.closedAt,
       createdAt: task.createdAt,
+      groupID: task.groupID,
+      groupStatus: task.groupStatus,
     );
 
     await bd
@@ -71,6 +91,37 @@ class TaskService {
         .doc(auth.currentUser?.uid)
         .collection("tasks")
         .doc("$taskDate $taskCode")
+        .set(newTask.toMap());
+
+    return newTask;
+  }
+
+  createSubTask(Task task, DateTime date, String groupID) async {
+    int index = await _getNextSubTaskIndex(groupID);
+
+    String taskCode = (index).toString().padLeft(5, '0');
+    String taskDate = formatting.formatDate(date);
+
+    String id = "$groupID $taskCode";
+
+    Task newTask = Task(
+      type: task.type,
+      date: taskDate,
+      title: task.title,
+      id: id,
+      closed: task.closed,
+      description: task.description,
+      closedAt: task.closedAt,
+      createdAt: task.createdAt,
+      groupID: task.groupID,
+      groupStatus: task.groupStatus,
+    );
+
+    await bd
+        .collection("users")
+        .doc(auth.currentUser?.uid)
+        .collection("subtasks")
+        .doc(id)
         .set(newTask.toMap());
 
     return newTask;
@@ -125,6 +176,12 @@ class TaskService {
     return tasks.length + 1;
   }
 
+  _getNextSubTaskIndex(String groupID) async {
+    var tasks = await getSubTasks(groupID);
+
+    return tasks.length + 1;
+  }
+
   getTasksCount(DateTime date) async {
     var counters = [0, 0, 0, 0, 0];
 
@@ -150,6 +207,20 @@ class TaskService {
         .update({
       "closedAt": newClosedAt,
       "closed": newClosed,
+    });
+
+    return true;
+  }
+
+  turnIntoGroup(Task task) async {
+    await bd
+        .collection("users")
+        .doc(auth.currentUser?.uid)
+        .collection("tasks")
+        .doc(task.id)
+        .update({
+      "groupStatus": "group",
+      "groupID": task.id,
     });
 
     return true;

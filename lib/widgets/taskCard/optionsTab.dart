@@ -97,6 +97,10 @@ class _OptionsTabState extends State<OptionsTab> {
     ;
   }
 
+  isGroup() {
+    return widget.task.groupStatus == "group";
+  }
+
   _optionIcon({
     IconData? icon,
     String? text,
@@ -166,24 +170,41 @@ class _OptionsTabState extends State<OptionsTab> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Expanded(flex: 1, child: SizedBox()),
+          // Visibility(
+          //   visible: !isGroup(),
+          //   child: _optionIcon(
+          //     icon: Icons.checklist,
+          //     text: "Grupo",
+          //     number: 0,
+          //   ),
+          // ),
+          // Visibility(
+          //   visible: isGroup(),
+          //   child: _optionIcon(
+          //     icon: Icons.checklist,
+          //     text: "Subtarefas",
+          //     number: 0,
+          //   ),
+          // ),
+
           _optionIcon(
             icon: Icons.edit_calendar,
             text: "Realocação",
-            number: 0,
+            number: 1,
           ),
           _optionIcon(
             icon:
-                widget.selectedTab == 1 ? Icons.circle : Icons.circle_outlined,
+                widget.selectedTab == 2 ? Icons.circle : Icons.circle_outlined,
             text: "Tipo",
             iconSize: 20,
-            number: 1,
+            number: 2,
             iconColor: app.types.getColor(widget.task.type),
           ),
-          _optionIcon(
-            icon: Icons.event,
-            text: "Prazo",
-            number: 2,
-          ),
+          // _optionIcon(
+          //   icon: Icons.event,
+          //   text: "Prazo",
+          //   number: 2,
+          // ),
           const Expanded(flex: 1, child: SizedBox()),
         ],
       ),

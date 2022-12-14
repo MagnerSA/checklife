@@ -12,12 +12,14 @@ class TaskCreationCard extends StatefulWidget {
   final FocusNode focusNode;
   final TextEditingController textController;
   final void Function() createTask;
+  final String? text;
 
   const TaskCreationCard({
     Key? key,
     required this.focusNode,
     required this.textController,
     required this.createTask,
+    this.text,
   }) : super(key: key);
 
   @override
@@ -54,13 +56,14 @@ class _TaskCreationCardState extends State<TaskCreationCard> {
           child: Center(
             child: Row(
               children: [
+                const SizedBox(width: 15),
                 Expanded(
                   child: TextFormField(
                     maxLines: null,
                     focusNode: widget.focusNode,
                     controller: widget.textController,
-                    decoration: const InputDecoration(
-                      hintText: "Criar nova tarefa",
+                    decoration: InputDecoration(
+                      hintText: widget.text ?? "Criar nova tarefa",
                     ),
                     onChanged: (_) {
                       setState(() {});
@@ -73,6 +76,7 @@ class _TaskCreationCardState extends State<TaskCreationCard> {
                         onPressed: widget.createTask,
                         icon: const Icon(Icons.add),
                       ),
+                SizedBox(width: (widget.textController.text == "") ? 15 : 0),
               ],
             ),
           ),

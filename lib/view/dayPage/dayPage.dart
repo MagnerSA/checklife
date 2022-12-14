@@ -31,8 +31,8 @@ class _DayPageState extends State<DayPage> {
   ApplicationController app = ApplicationController();
   TaskService service = TaskService();
 
-  TextEditingController textController = TextEditingController();
   ScrollController scrollController = ScrollController();
+  TextEditingController textController = TextEditingController();
   FocusNode focusNode = FocusNode();
 
   bool isLoading = true;
@@ -167,6 +167,8 @@ class _DayPageState extends State<DayPage> {
       closedAt: "",
       createdAt: app.formatting.formatDate(app.today),
       type: 0,
+      groupStatus: "",
+      groupID: "",
     );
 
     newTask = await service.createTask(newTask, app.currentDate);
